@@ -1,4 +1,6 @@
 // Copyright (c) 2011-2019 The Bitcoin Core developers
+// Copyright (c) 2014-2017 The Dash Core developers
+// Copyright (c) 2018 FXTC developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -36,6 +38,11 @@
 #include <interfaces/node.h>
 #include <ui_interface.h>
 #include <util/system.h>
+
+// Dash
+#include <masternode-sync.h>
+#include <qt/masternodelist.h>
+//
 
 #include <QAction>
 #include <QApplication>
@@ -168,7 +175,10 @@ BitcoinGUI::BitcoinGUI(interfaces::Node& node, const PlatformStyle *_platformSty
     progressBarLabel->setVisible(false);
     progressBar = new GUIUtil::ProgressBar();
     progressBar->setAlignment(Qt::AlignCenter);
-    progressBar->setVisible(false);
+    // Dash
+    //progressBar->setVisible(false);
+    progressBar->setVisible(true);
+    //
 
     // Override style sheet for progress bar for styles that have a segmented progress bar,
     // as they make the text unreadable (workaround for issue #1071)
@@ -272,6 +282,24 @@ void BitcoinGUI::createActions()
     tabGroup->addAction(historyAction);
 
 #ifdef ENABLE_WALLET
+    // Dash
+    QSettings settings;
+    if (settings.value("fShowMasternodesTab").toBool()) {
+        masternodeAction = new QAction(platformStyle->SingleColorIcon(":/icons/masternodes"), tr("&Masternodes"), this);
+        masternodeAction->setStatusTip(tr("Browse masternodes"));
+        masternodeAction->setToolTip(masternodeAction->statusTip());
+        masternodeAction->setCheckable(true);
+#ifdef Q_OS_MAC
+        masternodeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_5));
+#else
+        masternodeAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
+#endif
+        tabGroup->addAction(masternodeAction);
+        connect(masternodeAction, &QAction::triggered, [this]{ showNormalIfMinimized(); });
+        connect(masternodeAction, &QAction::triggered, [this]{ gotoMasternodePage(); });
+    }
+    //
+
     // These showNormalIfMinimized are needed because Send Coins and Receive Coins
     // can be triggered from the tray menu, and need to show the GUI to be useful.
     connect(overviewAction, &QAction::triggered, [this]{ showNormalIfMinimized(); });
@@ -318,6 +346,33 @@ void BitcoinGUI::createActions()
     verifyMessageAction = new QAction(tr("&Verify message..."), this);
     verifyMessageAction->setStatusTip(tr("Verify messages to ensure they were signed with specified Bitcoin addresses"));
 
+    // Dash
+    // FXTC TODO: menu items
+    //-//openInfoAction = new QAction(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation), tr("&Information"), this);
+    //-//openInfoAction->setStatusTip(tr("Show diagnostic information"));
+    //-//openRPCConsoleAction = new QAction(QIcon(":/icons/" + theme + "/debugwindow"), tr("&Debug console"), this);
+    //-//openRPCConsoleAction->setStatusTip(tr("Open debugging console"));
+    //-//openGraphAction = new QAction(QIcon(":/icons/" + theme + "/connect_4"), tr("&Network Monitor"), this);
+    //-//openGraphAction->setStatusTip(tr("Show network monitor"));
+    //-//openPeersAction = new QAction(QIcon(":/icons/" + theme + "/connect_4"), tr("&Peers list"), this);
+    //-//openPeersAction->setStatusTip(tr("Show peers info"));
+    //-//openRepairAction = new QAction(QIcon(":/icons/" + theme + "/options"), tr("Wallet &Repair"), this);
+    //-//openRepairAction->setStatusTip(tr("Show wallet repair options"));
+    //-//openConfEditorAction = new QAction(QIcon(":/icons/" + theme + "/edit"), tr("Open Wallet &Configuration File"), this);
+    //-//openConfEditorAction->setStatusTip(tr("Open configuration file"));
+    openMNConfEditorAction = new QAction(platformStyle->TextColorIcon(":/icons/edit"), tr("Open &Masternode Configuration File"), this);
+    openMNConfEditorAction->setStatusTip(tr("Open Masternode configuration file"));
+    //-//showBackupsAction = new QAction(QIcon(":/icons/" + theme + "/browse"), tr("Show Automatic &Backups"), this);
+    //-//showBackupsAction->setStatusTip(tr("Show automatically created wallet backups"));
+    // initially disable the debug window menu items
+    //-//openInfoAction->setEnabled(false);
+    //-// ## duplicate ## openRPCConsoleAction->setEnabled(false);
+    //-//openGraphAction->setEnabled(false);
+    //-//openPeersAction->setEnabled(false);
+    //-//openRepairAction->setEnabled(false);
+
+    //
+
     openRPCConsoleAction = new QAction(tr("&Debug window"), this);
     openRPCConsoleAction->setStatusTip(tr("Open debugging and diagnostic console"));
     // initially disable the debug window menu item
@@ -348,6 +403,37 @@ void BitcoinGUI::createActions()
     showHelpMessageAction->setMenuRole(QAction::NoRole);
     showHelpMessageAction->setStatusTip(tr("Show the %1 help message to get a list with possible Bitcoin command-line options").arg(PACKAGE_NAME));
 
+    // Dash
+    // FXTC TODO: menu items
+    //-//showPrivateSendHelpAction = new QAction(QApplication::style()->standardIcon(QStyle::SP_MessageBoxInformation), tr("&PrivateSend information"), this);
+    //-//showPrivateSendHelpAction->setMenuRole(QAction::NoRole);
+    //-//showPrivateSendHelpAction->setStatusTip(tr("Show the PrivateSend basic information"));
+
+    //-//connect(quitAction, &QAction::triggered, [qApp]{ quit(); });
+    //-//connect(aboutAction, &QAction::triggered, [this]{ aboutClicked(); });
+    //-//connect(aboutQtAction, &QAction::triggered, [qApp]{ aboutQt(); });
+    //-//connect(optionsAction, &QAction::triggered, [this]{ optionsClicked(); });
+    //-//connect(toggleHideAction, &QAction::triggered, [this]{ toggleHidden(); });
+    //-//connect(showHelpMessageAction, &QAction::triggered, [this]{ showHelpMessageClicked(); });
+    //-//connect(showPrivateSendHelpAction, &QAction::triggered, [this]{ showPrivateSendHelpClicked(); });
+
+    // Jump directly to tabs in RPC-console
+    //-//connect(openInfoAction, &QAction::triggered, [this]{ showInfo(); });
+    //-//connect(openRPCConsoleAction, &QAction::triggered, [this]{ showConsole(); });
+    //-//connect(openGraphAction, &QAction::triggered, [this]{ showGraph(); });
+    //-//connect(openPeersAction, &QAction::triggered, [this]{ showPeers(); });
+    //-//connect(openRepairAction, &QAction::triggered, [this]{ showRepair(); });
+
+    // Open configs and backup folder from menu
+    //-//connect(openConfEditorAction, &QAction::triggered, [this]{ showConfEditor(); });
+    //connect(openMNConfEditorAction, &QAction::triggered, [this]{ showMNConfEditor(); });
+    connect(openMNConfEditorAction, &QAction::triggered, this, &BitcoinGUI::showMNConfEditor);
+    //-//connect(showBackupsAction, &QAction::triggered, [this]{ showBackups(); });
+
+    // Get restart command-line parameters and handle restart
+    //-//connect(rpcConsole, &QAction::triggered, [this]{ handleRestart(QStringList); });
+    //
+
     connect(quitAction, &QAction::triggered, qApp, QApplication::quit);
     connect(aboutAction, &QAction::triggered, this, &BitcoinGUI::aboutClicked);
     connect(aboutQtAction, &QAction::triggered, qApp, QApplication::aboutQt);
@@ -364,6 +450,13 @@ void BitcoinGUI::createActions()
         connect(encryptWalletAction, &QAction::triggered, walletFrame, &WalletFrame::encryptWallet);
         connect(backupWalletAction, &QAction::triggered, walletFrame, &WalletFrame::backupWallet);
         connect(changePassphraseAction, &QAction::triggered, walletFrame, &WalletFrame::changePassphrase);
+
+        // Dash
+        // FXTC TODO: menu items
+        //-//connect(unlockWalletAction, &QAction::triggered, [walletFrame] { unlockWallet(); });
+        //connect(lockWalletAction, &QAction::triggered, [walletFrame]{ lockWallet(); });
+        //
+
         connect(signMessageAction, &QAction::triggered, [this]{ showNormalIfMinimized(); });
         connect(signMessageAction, &QAction::triggered, [this]{ gotoSignMessageTab(); });
         connect(verifyMessageAction, &QAction::triggered, [this]{ showNormalIfMinimized(); });
@@ -442,11 +535,35 @@ void BitcoinGUI::createMenuBar()
     }
     file->addAction(quitAction);
 
+    // Dash
+    if(walletFrame)
+    {
+        // FXTC TODO: menu items
+        QMenu *tools = appMenuBar->addMenu(tr("&Tools"));
+        //-//tools->addAction(openInfoAction);
+        //-//tools->addAction(openRPCConsoleAction);
+        //-//tools->addAction(openGraphAction);
+        //-//tools->addAction(openPeersAction);
+        //-//tools->addAction(openRepairAction);
+        //-//tools->addSeparator();
+        //-//tools->addAction(openConfEditorAction);
+        tools->addAction(openMNConfEditorAction);
+        //-//tools->addAction(showBackupsAction);
+    }
+    //
+
     QMenu *settings = appMenuBar->addMenu(tr("&Settings"));
     if(walletFrame)
     {
         settings->addAction(encryptWalletAction);
         settings->addAction(changePassphraseAction);
+
+        // Dash
+        // FXTC TODO: menu items
+        //-//settings->addAction(unlockWalletAction);
+        //-//settings->addAction(lockWalletAction);
+        //
+
         settings->addSeparator();
     }
     settings->addAction(optionsAction);
@@ -520,6 +637,13 @@ void BitcoinGUI::createToolBars()
         toolbar->addAction(sendCoinsAction);
         toolbar->addAction(receiveCoinsAction);
         toolbar->addAction(historyAction);
+        // Dash
+        QSettings settings;
+        if (settings.value("fShowMasternodesTab").toBool())
+        {
+            toolbar->addAction(masternodeAction);
+        }
+        //
         overviewAction->setChecked(true);
 
 #ifdef ENABLE_WALLET
@@ -561,6 +685,10 @@ void BitcoinGUI::setClientModel(ClientModel *_clientModel)
         modalOverlay->setKnownBestHeight(_clientModel->getHeaderTipHeight(), QDateTime::fromTime_t(_clientModel->getHeaderTipTime()));
         setNumBlocks(m_node.getNumBlocks(), QDateTime::fromTime_t(m_node.getLastBlockTime()), m_node.getVerificationProgress(), false);
         connect(_clientModel, &ClientModel::numBlocksChanged, this, &BitcoinGUI::setNumBlocks);
+
+        // Dash
+        connect(clientModel, &ClientModel::additionalDataSyncProgressChanged, this, &BitcoinGUI::setAdditionalDataSyncProgress);
+        //
 
         // Receive and report messages from client model
         connect(_clientModel, &ClientModel::message, [this](const QString &title, const QString &message, unsigned int style){
@@ -696,6 +824,14 @@ void BitcoinGUI::setWalletActionsEnabled(bool enabled)
     receiveCoinsAction->setEnabled(enabled);
     receiveCoinsMenuAction->setEnabled(enabled);
     historyAction->setEnabled(enabled);
+
+    // Dash
+    QSettings settings;
+    if (settings.value("fShowMasternodesTab").toBool() && masternodeAction) {
+        masternodeAction->setEnabled(enabled);
+    }
+    //
+
     encryptWalletAction->setEnabled(enabled);
     backupWalletAction->setEnabled(enabled);
     changePassphraseAction->setEnabled(enabled);
@@ -752,6 +888,21 @@ void BitcoinGUI::createTrayIconMenu()
         trayIconMenu->addAction(openRPCConsoleAction);
     }
     trayIconMenu->addAction(optionsAction);
+    // FXTC BEGIN
+    trayIconMenu->addAction(openRPCConsoleAction);
+    // FXTC END
+
+    // Dash
+    // FXTC TODO: menu items
+    //-//trayIconMenu->addAction(openGraphAction);
+    //-//trayIconMenu->addAction(openPeersAction);
+    //-//trayIconMenu->addAction(openRepairAction);
+    //-//trayIconMenu->addSeparator();
+    //-//trayIconMenu->addAction(openConfEditorAction);
+    trayIconMenu->addAction(openMNConfEditorAction);
+    //-//trayIconMenu->addAction(showBackupsAction);
+    //
+
 #ifndef Q_OS_MAC // This is built-in on macOS
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(quitAction);
@@ -801,6 +952,13 @@ void BitcoinGUI::showDebugWindowActivateConsole()
     showDebugWindow();
 }
 
+// Dash
+void BitcoinGUI::showMNConfEditor()
+{
+    GUIUtil::openMNConfigfile();
+}
+//
+
 void BitcoinGUI::showHelpMessageClicked()
 {
     helpMessageDialog->show();
@@ -827,6 +985,17 @@ void BitcoinGUI::gotoHistoryPage()
     historyAction->setChecked(true);
     if (walletFrame) walletFrame->gotoHistoryPage();
 }
+
+// Dash
+void BitcoinGUI::gotoMasternodePage()
+{
+    QSettings settings;
+    if (settings.value("fShowMasternodesTab").toBool()) {
+        masternodeAction->setChecked(true);
+        if (walletFrame) walletFrame->gotoMasternodePage();
+    }
+}
+//
 
 void BitcoinGUI::gotoReceiveCoinsPage()
 {
@@ -976,14 +1145,21 @@ void BitcoinGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
         {
             walletFrame->showOutOfSyncWarning(false);
             modalOverlay->showHide(true, true);
+
+            if(secs < 25*60)
+                modalOverlay->hideForever();
         }
 #endif // ENABLE_WALLET
-
-        progressBarLabel->setVisible(false);
-        progressBar->setVisible(false);
+        // Dash
+        //progressBarLabel->setVisible(false);
+        //progressBar->setVisible(false);
+        //
     }
-    else
+    // Dash
+    //else
+    if(!masternodeSync.IsBlockchainSynced())
     {
+    //
         QString timeBehindText = GUIUtil::formatNiceTimeOffset(secs);
 
         progressBarLabel->setVisible(true);
@@ -1023,6 +1199,65 @@ void BitcoinGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVer
     progressBarLabel->setToolTip(tooltip);
     progressBar->setToolTip(tooltip);
 }
+
+// Dash
+void BitcoinGUI::setAdditionalDataSyncProgress(double nSyncProgress)
+{
+    if(!clientModel)
+        return;
+
+    // No additional data sync should be happening while blockchain is not synced, nothing to update
+    if(!masternodeSync.IsBlockchainSynced())
+        return;
+
+    // Prevent orphan statusbar messages (e.g. hover Quit in main menu, wait until chain-sync starts -> garbelled text)
+    statusBar()->clearMessage();
+
+    QString tooltip;
+
+    // Set icon state: spinning if catching up, tick otherwise
+    // FXTC TODO: themes
+    //QString theme = GUIUtil::getThemeName();
+
+    QString strSyncStatus;
+    tooltip = tr("Up to date") + QString(".<br>") + tooltip;
+
+    if(masternodeSync.IsSynced()) {
+        progressBarLabel->setVisible(false);
+        progressBar->setVisible(false);
+        // FXTC TODO: themes
+        //labelBlocksIcon->setPixmap(QIcon(":/icons/" + theme + "/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+        labelBlocksIcon->setPixmap(platformStyle->SingleColorIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+        //
+    } else {
+
+        labelBlocksIcon->setPixmap(platformStyle->SingleColorIcon(QString(
+            ":/movies/spinner-%1").arg(spinnerFrame, 3, 10, QChar('0')))
+            .pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+        spinnerFrame = (spinnerFrame + 1) % SPINNER_FRAMES;
+
+#ifdef ENABLE_WALLET
+        if(walletFrame)
+            walletFrame->showOutOfSyncWarning(false);
+#endif // ENABLE_WALLET
+
+        progressBar->setFormat(tr("Synchronizing additional data: %p%"));
+        progressBar->setMaximum(1000000000);
+        progressBar->setValue(nSyncProgress * 1000000000.0 + 0.5);
+    }
+
+    strSyncStatus = QString(masternodeSync.GetSyncStatus().c_str());
+    progressBarLabel->setText(strSyncStatus);
+    tooltip = strSyncStatus + QString("<br>") + tooltip;
+
+    // Don't word-wrap this (fixed-width) tooltip
+    tooltip = QString("<nobr>") + tooltip + QString("</nobr>");
+
+    labelBlocksIcon->setToolTip(tooltip);
+    progressBarLabel->setToolTip(tooltip);
+    progressBar->setToolTip(tooltip);
+}
+//
 
 void BitcoinGUI::message(const QString& title, QString message, unsigned int style, bool* ret)
 {
@@ -1221,6 +1456,11 @@ void BitcoinGUI::setEncryptionStatus(int status)
         labelWalletEncryptionIcon->hide();
         encryptWalletAction->setChecked(false);
         changePassphraseAction->setEnabled(false);
+        // Dash
+        // FXTC TODO: menu items
+        //-//unlockWalletAction->setVisible(false);
+        //-//lockWalletAction->setVisible(false);
+        //
         encryptWalletAction->setEnabled(true);
         break;
     case WalletModel::Unlocked:
@@ -1229,14 +1469,39 @@ void BitcoinGUI::setEncryptionStatus(int status)
         labelWalletEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>"));
         encryptWalletAction->setChecked(true);
         changePassphraseAction->setEnabled(true);
+        // Dash
+        // FXTC TODO: menu items
+        //-//unlockWalletAction->setVisible(false);
+        //-//lockWalletAction->setVisible(true);
+        //
         encryptWalletAction->setEnabled(false); // TODO: decrypt currently not supported
         break;
+    // Dash
+    case WalletModel::UnlockedForMixingOnly:
+        labelWalletEncryptionIcon->show();
+        labelWalletEncryptionIcon->setPixmap(platformStyle->SingleColorIcon(":/icons/lock_open").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        labelWalletEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b> for mixing only"));
+        encryptWalletAction->setChecked(true);
+        changePassphraseAction->setEnabled(true);
+        // Dash
+        // FXTC TODO: menu items
+        //-//unlockWalletAction->setVisible(true);
+        //-//lockWalletAction->setVisible(true);
+        //
+        encryptWalletAction->setEnabled(false); // TODO: decrypt currently not supported
+        break;
+    //
     case WalletModel::Locked:
         labelWalletEncryptionIcon->show();
         labelWalletEncryptionIcon->setPixmap(platformStyle->SingleColorIcon(":/icons/lock_closed").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
         labelWalletEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>locked</b>"));
         encryptWalletAction->setChecked(true);
         changePassphraseAction->setEnabled(true);
+        // Dash
+        // FXTC TODO: menu items
+        //-//unlockWalletAction->setVisible(true);
+        //-//lockWalletAction->setVisible(false);
+        //
         encryptWalletAction->setEnabled(false); // TODO: decrypt currently not supported
         break;
     }

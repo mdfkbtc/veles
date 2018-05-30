@@ -1,4 +1,6 @@
 // Copyright (c) 2011-2018 The Bitcoin Core developers
+// Copyright (c) 2014-2017 The Dash Core developers
+// Copyright (c) 2018 FXTC developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -15,6 +17,12 @@
 #include <net.h>
 #include <netbase.h>
 #include <util/system.h>
+
+// Dash
+#include <masternodeman.h>
+#include <masternode-sync.h>
+#include <privatesend.h>
+//
 
 #include <stdint.h>
 
@@ -52,6 +60,13 @@ ClientModel::ClientModel(interfaces::Node& node, OptionsModel *_optionsModel, QO
     timer->moveToThread(m_thread);
     m_thread->start();
 
+    // Dash
+    pollMnTimer = new QTimer(this);
+    connect(pollMnTimer, &QTimer::timeout, this, &ClientModel::updateMnTimer);
+    // no need to update as frequent as data for balances/txes/blocks
+    pollMnTimer->start(MODEL_UPDATE_DELAY * 4);
+    //
+
     subscribeToCoreSignals();
 }
 
@@ -76,6 +91,20 @@ int ClientModel::getNumConnections(unsigned int flags) const
 
     return m_node.getNodeCount(connections);
 }
+
+// Dash
+QString ClientModel::getMasternodeCountString() const
+{
+    // return tr("Total: %1 (PS compatible: %2 / Enabled: %3) (IPv4: %4, IPv6: %5, TOR: %6)").arg(QString::number((int)mnodeman.size()))
+    return tr("Total: %1 (PS compatible: %2 / Enabled: %3)")
+            .arg(QString::number((int)mnodeman.size()))
+            .arg(QString::number((int)mnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION)))
+            .arg(QString::number((int)mnodeman.CountEnabled()));
+            // .arg(QString::number((int)mnodeman.CountByIP(NET_IPV4)))
+            // .arg(QString::number((int)mnodeman.CountByIP(NET_IPV6)))
+            // .arg(QString::number((int)mnodeman.CountByIP(NET_TOR)));
+}
+//
 
 int ClientModel::getHeaderTipHeight() const
 {
@@ -104,6 +133,20 @@ int64_t ClientModel::getHeaderTipTime() const
     }
     return cachedBestHeaderTime;
 }
+
+// Dash
+void ClientModel::updateMnTimer()
+{
+    QString newMasternodeCountString = getMasternodeCountString();
+
+    if (cachedMasternodeCountString != newMasternodeCountString)
+    {
+        cachedMasternodeCountString = newMasternodeCountString;
+
+        Q_EMIT strMasternodesChanged(cachedMasternodeCountString);
+    }
+}
+//
 
 void ClientModel::updateNumConnections(int numConnections)
 {
@@ -255,6 +298,12 @@ static void BlockTipChanged(ClientModel *clientmodel, bool initialSync, int heig
     }
 }
 
+static void NotifyAdditionalDataSyncProgressChanged(ClientModel *clientmodel, double nSyncProgress)
+{
+    QMetaObject::invokeMethod(clientmodel, "additionalDataSyncProgressChanged", Qt::QueuedConnection,
+                              Q_ARG(double, nSyncProgress));
+}
+
 void ClientModel::subscribeToCoreSignals()
 {
     // Connect signals to client
@@ -265,6 +314,9 @@ void ClientModel::subscribeToCoreSignals()
     m_handler_banned_list_changed = m_node.handleBannedListChanged(std::bind(BannedListChanged, this));
     m_handler_notify_block_tip = m_node.handleNotifyBlockTip(std::bind(BlockTipChanged, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, false));
     m_handler_notify_header_tip = m_node.handleNotifyHeaderTip(std::bind(BlockTipChanged, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, true));
+    // Dash
+    m_handler_notify_additional_data_sync_progress_changed = m_node.handleNotifyAdditionalDataSyncProgressChanged(std::bind(NotifyAdditionalDataSyncProgressChanged, this, std::placeholders::_1));
+    //
 }
 
 void ClientModel::unsubscribeFromCoreSignals()
@@ -277,6 +329,9 @@ void ClientModel::unsubscribeFromCoreSignals()
     m_handler_banned_list_changed->disconnect();
     m_handler_notify_block_tip->disconnect();
     m_handler_notify_header_tip->disconnect();
+    // Dash
+    m_handler_notify_additional_data_sync_progress_changed->disconnect();
+    //
 }
 
 bool ClientModel::getProxyInfo(std::string& ip_port) const

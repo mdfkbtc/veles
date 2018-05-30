@@ -1,5 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2019 The Bitcoin Core developers
+// Copyright (c) 2014-2017 The Dash Core developers
+// Copyright (c) 2018 FXTC developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -63,6 +65,10 @@ static const unsigned int MAX_PROTOCOL_MESSAGE_LENGTH = 4 * 1000 * 1000;
 static const unsigned int MAX_SUBVERSION_LENGTH = 256;
 /** Maximum number of automatic outgoing nodes over which we'll relay everything (blocks, tx, addrs, etc) */
 static const int MAX_OUTBOUND_FULL_RELAY_CONNECTIONS = 8;
+// Dash
+/** Maximum number if outgoing masternodes */
+static const int MAX_OUTBOUND_MASTERNODE_CONNECTIONS = 20;
+//
 /** Maximum number of addnode outgoing nodes */
 static const int MAX_ADDNODE_CONNECTIONS = 8;
 /** Maximum number of block-relay-only outgoing connections */
@@ -202,12 +208,88 @@ public:
     bool GetNetworkActive() const { return fNetworkActive; };
     bool GetUseAddrmanOutgoing() const { return m_use_addrman_outgoing; };
     void SetNetworkActive(bool active);
-    void OpenNetworkConnection(const CAddress& addrConnect, bool fCountFailure, CSemaphoreGrant *grantOutbound = nullptr, const char *strDest = nullptr, bool fOneShot = false, bool fFeeler = false, bool manual_connection = false, bool block_relay_only = false);
+    // FXTC BEGIN
+    //void OpenNetworkConnection(const CAddress& addrConnect, bool fCountFailure, CSemaphoreGrant *grantOutbound = nullptr, const char *strDest = nullptr, bool fOneShot = false, bool fFeeler = false, bool manual_connection = false, bool block_relay_only = false);
+    // fConnectToMasternode should be 'true' only if you want this node to allow to connect to itself
+    // and/or you want it to be disconnected on CMasternodeMan::ProcessMasternodeConnections()
+    CNode* OpenNetworkConnection(const CAddress& addrConnect, bool fCountFailure, CSemaphoreGrant *grantOutbound = nullptr, const char *strDest = nullptr, bool fOneShot = false, bool fFeeler = false, bool manual_connection = false, bool block_relay_only = false, bool fConnectToMasternode = false);
+    // FXTC END
     bool CheckIncomingNonce(uint64_t nonce);
 
+    // Dash
+    // FXTC BEGIN
+    // ConnectNode() is private because public ConnectNode() is replaced by public OpenNetworkConnection() in Dash functions
+    // FXTC END
+    struct CFullyConnectedOnly {
+        bool operator() (const CNode* pnode) const {
+            return NodeFullyConnected(pnode);
+        }
+    };
+
+    constexpr static const CFullyConnectedOnly FullyConnectedOnly{};
+
+    struct CAllNodes {
+        bool operator() (const CNode*) const {return true;}
+    };
+
+    struct CAllNodesExceptMasternodes {
+        bool operator() (const CNode* pnode) const {return NotMasternodesOnly(pnode);}
+    };
+
+    constexpr static const CAllNodes AllNodes{};
+    constexpr static const CAllNodesExceptMasternodes AllNodesExceptMasternodes{};
+    //
+
     bool ForNode(NodeId id, std::function<bool(CNode* pnode)> func);
+    // Dash
+    bool ForNode(const CService& addr, std::function<bool(CNode* pnode)> func);
+    //
 
     void PushMessage(CNode* pnode, CSerializedNetMsg&& msg);
+
+    template<typename Condition, typename Callable>
+    bool ForEachNodeContinueIf(const Condition& cond, Callable&& func)
+    {
+        LOCK(cs_vNodes);
+        for (auto&& node : vNodes)
+            if (cond(node))
+                if(!func(node))
+                    return false;
+        return true;
+    };
+
+    template<typename Callable>
+    bool ForEachNodeContinueIf(Callable&& func)
+    {
+        return ForEachNodeContinueIf(FullyConnectedOnly, func);
+    }
+
+    template<typename Condition, typename Callable>
+    bool ForEachNodeContinueIf(const Condition& cond, Callable&& func) const
+    {
+        LOCK(cs_vNodes);
+        for (const auto& node : vNodes)
+            if (cond(node))
+                if(!func(node))
+                    return false;
+        return true;
+    };
+
+    template<typename Callable>
+    bool ForEachNodeContinueIf(Callable&& func) const
+    {
+        return ForEachNodeContinueIf(FullyConnectedOnly, func);
+    }
+
+    template<typename Condition, typename Callable>
+    void ForEachNode(const Condition& cond, Callable&& func)
+    {
+        LOCK(cs_vNodes);
+        for (auto&& node : vNodes) {
+            if (cond(node))
+                func(node);
+        }
+    };
 
     template<typename Callable>
     void ForEachNode(Callable&& func)
@@ -251,10 +333,20 @@ public:
         post();
     };
 
+    // Dash functions
+    std::vector<CNode*> CopyNodeVector();
+    void ReleaseNodeVector(const std::vector<CNode*>& vecNodes);
+
+    void RelayTransaction(const CTransaction& tx);
+    void RelayTransaction(const CTransaction& tx, const CDataStream& ss);
+    void RelayInv(CInv &inv, const int minProtoVersion = MIN_PEER_PROTO_VERSION);
+    //
+
     // Addrman functions
     size_t GetAddressCount() const;
     void SetServices(const CService &addr, ServiceFlags nServices);
     void MarkAddressGood(const CAddress& addr);
+    void AddNewAddress(const CAddress& addr, const CAddress& addrFrom, int64_t nTimePenalty = 0);
     void AddNewAddresses(const std::vector<CAddress>& vAddr, const CAddress& addrFrom, int64_t nTimePenalty = 0);
     std::vector<CAddress> GetAddresses();
 
@@ -357,6 +449,9 @@ private:
     void SocketHandler();
     void ThreadSocketHandler();
     void ThreadDNSAddressSeed();
+    // Dash
+    void ThreadMnbRequestConnections();
+    //
 
     uint64_t CalculateKeyedNetGroup(const CAddress& ad) const;
 
@@ -366,8 +461,11 @@ private:
     CNode* FindNode(const CService& addr);
 
     bool AttemptToEvictConnection();
-    CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fCountFailure, bool manual_connection, bool block_relay_only);
+    // FXTC BEGIN
+    //CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fCountFailure, bool manual_connection, bool block_relay_only);
+    CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool fCountFailure, bool manual_connection, bool block_relay_only, bool fConnectToMasternode = false);
     void AddWhitelistPermissionFlags(NetPermissionFlags& flags, const CNetAddr &addr) const;
+    // FXTC END
 
     void DeleteNode(CNode* pnode);
 
@@ -382,6 +480,8 @@ private:
 
     // Whether the node should be passed out in ForEach* callbacks
     static bool NodeFullyConnected(const CNode* pnode);
+
+    static bool NotMasternodesOnly(const CNode* pnode);
 
     // Network usage totals
     CCriticalSection cs_totalBytesRecv;
@@ -434,6 +534,9 @@ private:
     ServiceFlags nLocalServices;
 
     std::unique_ptr<CSemaphore> semOutbound;
+    // Dash
+    std::unique_ptr<CSemaphore> semMasternodeOutbound;
+    //
     std::unique_ptr<CSemaphore> semAddnode;
     int nMaxConnections;
 
@@ -469,6 +572,9 @@ private:
     std::thread threadSocketHandler;
     std::thread threadOpenAddedConnections;
     std::thread threadOpenConnections;
+    // Dash
+    std::thread threadMnbRequestConnections;
+    //
     std::thread threadMessageHandler;
 
     /** flag for deciding to connect to an extra outbound peer,
@@ -558,6 +664,12 @@ CAddress GetLocalAddress(const CNetAddr *paddrPeer, ServiceFlags nLocalServices)
 extern bool fDiscover;
 extern bool fListen;
 extern bool g_relay_txes;
+
+// Dash
+extern std::map<CInv, CDataStream> mapRelayDash;
+extern std::deque<std::pair<int64_t, CInv> > vRelayExpirationDash;
+extern CCriticalSection cs_mapRelayDash;
+//
 
 /** Subversion as sent to the P2P network in `version` messages */
 extern std::string strSubVersion;
@@ -702,6 +814,9 @@ public:
     // This boolean is unusued in actual processing, only present for backward compatibility at RPC/QT level
     bool m_legacyWhitelisted{false};
     bool fFeeler{false}; // If true this node is being used as a short lived feeler.
+    // Dash
+    bool fNetworkNode;
+    //
     bool fOneShot{false};
     bool m_manual_connection{false};
     bool fClient{false}; // set by version message
@@ -711,8 +826,14 @@ public:
     // Setting fDisconnect to true will cause the node to be disconnected the
     // next time DisconnectNodes() runs
     std::atomic_bool fDisconnect{false};
+    // Dash
+    bool fMasternode{false};
+    //
     bool fSentAddr{false};
     CSemaphoreGrant grantOutbound;
+    // Dash
+    CSemaphoreGrant grantMasternodeOutbound;
+    //
     std::atomic<int> nRefCount{0};
 
     const uint64_t nKeyedNetGroup;
@@ -736,12 +857,19 @@ public:
 
     const bool m_addr_relay_peer;
     bool IsAddrRelayPeer() const { return m_addr_relay_peer; }
+    
+    // Dash
+    std::vector<CInv> vInventoryToSend;
+    //
 
     // List of block ids we still have announce.
     // There is no final sorting before sending, as they are always sent immediately
     // and in the order requested.
     std::vector<uint256> vInventoryBlockToSend GUARDED_BY(cs_inventory);
     CCriticalSection cs_inventory;
+    // Dash
+    int64_t nNextInvSendDash{0};
+    //
 
     struct TxRelay {
         TxRelay() { pfilter = MakeUnique<CBloomFilter>(); }
@@ -920,6 +1048,9 @@ public:
         } else if (inv.type == MSG_BLOCK) {
             LOCK(cs_inventory);
             vInventoryBlockToSend.push_back(inv.hash);
+        } else {
+            LogPrint(BCLog::NET, "PushInventory --  %s peer=%d\n", inv.ToString(), id);
+            vInventoryToSend.push_back(inv);
         }
     }
 

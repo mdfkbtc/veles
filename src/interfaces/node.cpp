@@ -318,6 +318,14 @@ public:
                     GuessVerificationProgress(Params().TxData(), block));
             }));
     }
+
+    // Dash
+    std::unique_ptr<Handler> handleNotifyAdditionalDataSyncProgressChanged(NotifyAdditionalDataSyncProgressChangedFn fn) override
+    {
+        return MakeHandler(::uiInterface.NotifyAdditionalDataSyncProgressChanged_connect(fn));
+    }
+    //
+
     InitInterfaces m_interfaces;
 };
 

@@ -1,5 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2018 The Bitcoin Core developers
+// Copyright (c) 2014-2017 The Dash Core developers
 // Copyright (c) 2018 FXTC developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -50,6 +51,9 @@
 #include <validationinterface.h>
 #include <warnings.h>
 
+#include <masternodeman.h>
+#include <masternode-payments.h>
+
 #include <future>
 #include <sstream>
 #include <string>
@@ -81,6 +85,11 @@ bool CBlockIndexWorkComparator::operator()(const CBlockIndex *pa, const CBlockIn
     // Identical blocks.
     return false;
 }
+
+    // Dash
+    bool DisconnectBlocks(int blocks);
+    void ReprocessBlocks(int nBlocks);
+    //
 
 namespace {
 BlockManager g_blockman;
@@ -133,6 +142,10 @@ CFeeRate minRelayTxFee = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE);
 
 CBlockPolicyEstimator feeEstimator;
 CTxMemPool mempool(&feeEstimator);
+
+// Dash
+map<uint256, int64_t> mapRejectedBlocks GUARDED_BY(cs_main);
+//
 
 /** Constant stuff for coinbase transactions we create: */
 CScript COINBASE_FLAGS;
@@ -431,6 +444,33 @@ static bool CheckInputsFromMempoolAndCache(const CTransaction& tx, CValidationSt
 
     return CheckInputs(tx, state, view, flags, cacheSigStore, true, txdata);
 }
+
+// Dash
+bool GetUTXOCoin(const COutPoint& outpoint, Coin& coin)
+{
+    LOCK(cs_main);
+    if (!pcoinsTip->GetCoin(outpoint, coin))
+        return false;
+    if (coin.IsSpent())
+        return false;
+    return true;
+}
+
+int GetUTXOHeight(const COutPoint& outpoint)
+{
+    // -1 means UTXO is yet unknown or already spent
+    Coin coin;
+    return GetUTXOCoin(outpoint, coin) ? coin.nHeight : -1;
+}
+
+int GetUTXOConfirmations(const COutPoint& outpoint)
+{
+    // -1 means UTXO is yet unknown or already spent
+    LOCK(cs_main);
+    int nPrevoutHeight = GetUTXOHeight(outpoint);
+    return (nPrevoutHeight > -1 && chainActive.Tip()) ? chainActive.Height() - nPrevoutHeight + 1 : -1;
+}
+//
 
 namespace {
 
@@ -1262,7 +1302,7 @@ double ConvertBitsToDouble(unsigned int nBits)
 
 // FXTC BEGIN
 //CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
-CAmount GetBlockSubsidy(int nHeight, CBlockHeader pblock, const Consensus::Params& consensusParams)
+CAmount GetBlockSubsidy(int nHeight, CBlockHeader pblock, const Consensus::Params& consensusParams, bool fSuperblockPartOnly)
 // FXTC END
 {
     int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
@@ -1287,7 +1327,11 @@ CAmount GetBlockSubsidy(int nHeight, CBlockHeader pblock, const Consensus::Param
     // Force minimum subsidy allowed
     if (nSubsidy < consensusParams.nMinimumSubsidy) nSubsidy = consensusParams.nMinimumSubsidy;
     // FXTC END
-    return nSubsidy;
+
+    // Hard fork to reduce the block reward by 10 extra percent (allowing budget/superblocks)
+    CAmount nSuperblockPart = (nHeight >= consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy/10 : 0;
+
+    return fSuperblockPartOnly ? nSuperblockPart : nSubsidy - nSuperblockPart;
 }
 
 CoinsViews::CoinsViews(
@@ -1332,6 +1376,18 @@ void CChainState::InitCoinsCache()
 bool CChainState::IsInitialBlockDownload() const
 
 // FXTC BEGIN
+CAmount GetMasternodePayment(int nHeight, CAmount blockValue)
+{
+    CAmount ret = blockValue * 0.00;
+
+    int nMNPIBlock = Params().GetConsensus().nMasternodePaymentsIncreaseBlock;
+    int nMNPIPeriod = Params().GetConsensus().nMasternodePaymentsIncreasePeriod;
+
+    if(nHeight >= nMNPIBlock) ret = (0.25 - 0.24 * (100.00 * nMNPIPeriod / (1.00 * nHeight + 100.00 * nMNPIPeriod ))) * blockValue; // Increase smoothly from 1% up to 25% in infinity
+
+    return ret;
+}
+
 CAmount GetFounderReward(int nHeight, CAmount blockValue)
 {
         CAmount ret = 0;
@@ -1867,6 +1923,16 @@ int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Para
     return nVersion;
 }
 
+bool GetBlockHash(uint256& hashRet, int nBlockHeight)
+{
+    LOCK(cs_main);
+    if(chainActive.Tip() == NULL) return false;
+    if(nBlockHeight < -1 || nBlockHeight > chainActive.Height()) return false;
+    if(nBlockHeight == -1) nBlockHeight = chainActive.Height();
+    hashRet = chainActive[nBlockHeight]->GetBlockHash();
+    return true;
+}
+
 /**
  * Threshold condition checker that triggers when unknown versionbits are seen on the network.
  */
@@ -2266,7 +2332,29 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
             return state.DoS(0, error("ConnectBlock(INFINEX): invalid founder reward destination"), REJECT_INVALID, "invalid-founder-reward-destination");
         }
     }
+
     // FXTC END
+
+    // DASH : MODIFIED TO CHECK MASTERNODE PAYMENTS AND SUPERBLOCKS
+
+    // It's possible that we simply don't have enough data and this could fail
+    // (i.e. block itself could be a correct one and we need to store it),
+    // that's why this is in ConnectBlock. Could be the other way around however -
+    // the peer who sent us this block is missing some data and wasn't able
+    // to recognize that block is actually invalid.
+    // TODO: resync data (both ways?) and try to reprocess this block later.
+    //CAmount blockReward = nFees + GetBlockSubsidy(pindex->nHeight, pindex->GetBlockHeader(), chainparams.GetConsensus());
+    std::string strError = "";
+    if (!IsBlockValueValid(block, pindex->nHeight, blockReward, strError)) {
+        return state.DoS(0, error("ConnectBlock(DASH): %s", strError), REJECT_INVALID, "bad-cb-amount");
+    }
+
+    if (!IsBlockPayeeValid(block.vtx[0], pindex->nHeight, blockReward, pindex->GetBlockHeader())) {
+        mapRejectedBlocks.insert(make_pair(block.GetHash(), GetTime()));
+        return state.DoS(0, error("ConnectBlock(DASH): couldn't find masternode or superblock payments"),
+                                REJECT_INVALID, "bad-cb-payee");
+    }
+    // END DASH
 
     if (!control.Wait())
         return state.Invalid(ValidationInvalidReason::CONSENSUS, error("%s: CheckQueue failed", __func__), REJECT_INVALID, "block-validation-failed");
@@ -2678,6 +2766,56 @@ bool CChainState::ConnectTip(CValidationState& state, const CChainParams& chainp
     connectTrace.BlockConnected(pindexNew, std::move(pthisBlock));
     return true;
 }
+
+// Dash
+bool CChainState::DisconnectBlocks(int blocks)
+{
+    LOCK(cs_main);
+
+    CValidationState state;
+
+    LogPrintf("DisconnectBlocks -- Got command to replay %d blocks\n", blocks);
+    for(int i = 0; i < blocks; i++) {
+        if(!DisconnectTip(state, Params(), nullptr) || !state.IsValid()) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void CChainState::ReprocessBlocks(int nBlocks)
+{
+    LOCK(cs_main);
+
+    std::map<uint256, int64_t>::iterator it = mapRejectedBlocks.begin();
+    while(it != mapRejectedBlocks.end()){
+        //use a window twice as large as is usual for the nBlocks we want to reset
+        if((*it).second  > GetTime() - (nBlocks*60*5)) {
+            BlockMap::iterator mi = mapBlockIndex.find((*it).first);
+            if (mi != mapBlockIndex.end() && (*mi).second) {
+
+                CBlockIndex* pindex = (*mi).second;
+                LogPrintf("ReprocessBlocks -- %s\n", (*it).first.ToString());
+
+                ResetBlockFailureFlags(pindex);
+            }
+        }
+        ++it;
+    }
+
+    DisconnectBlocks(nBlocks);
+
+    CValidationState state;
+    ActivateBestChain(state, Params(), std::shared_ptr<const CBlock>());
+}
+
+void ReprocessBlocks(int nBlocks)
+{
+    return g_chainstate.ReprocessBlocks(nBlocks);
+}
+
+//
 
 /**
  * Return the tip of the chain with the most work in it, that isn't

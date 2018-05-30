@@ -1,4 +1,6 @@
 // Copyright (c) 2011-2018 The Bitcoin Core developers
+// Copyright (c) 2014-2017 The Dash Core developers
+// Copyright (c) 2018 FXTC developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -56,6 +58,9 @@ public:
 
     //! Return number of connections, default is in- and outbound (total)
     int getNumConnections(unsigned int flags = CONNECTIONS_ALL) const;
+    // Dash
+    QString getMasternodeCountString() const;
+    //
     int getHeaderTipHeight() const;
     int64_t getHeaderTipTime() const;
 
@@ -86,18 +91,30 @@ private:
     std::unique_ptr<interfaces::Handler> m_handler_banned_list_changed;
     std::unique_ptr<interfaces::Handler> m_handler_notify_block_tip;
     std::unique_ptr<interfaces::Handler> m_handler_notify_header_tip;
+    // Dash
+    std::unique_ptr<interfaces::Handler> m_handler_notify_additional_data_sync_progress_changed;
+    //
     OptionsModel *optionsModel;
     PeerTableModel *peerTableModel;
+    // Dash
+    QString cachedMasternodeCountString;
+    //
     BanTableModel *banTableModel;
 
     //! A thread to interact with m_node asynchronously
     QThread* const m_thread;
+    // Dash
+    QTimer *pollMnTimer;
+    //
 
     void subscribeToCoreSignals();
     void unsubscribeFromCoreSignals();
 
 Q_SIGNALS:
     void numConnectionsChanged(int count);
+    // Dash
+    void strMasternodesChanged(const QString &strMasternodes);
+    //
     void numBlocksChanged(int count, const QDateTime& blockDate, double nVerificationProgress, bool header);
     void mempoolSizeChanged(long count, size_t mempoolSizeInBytes);
     void networkActiveChanged(bool networkActive);
@@ -111,6 +128,9 @@ Q_SIGNALS:
     void showProgress(const QString &title, int nProgress);
 
 public Q_SLOTS:
+    // Dash
+    void updateMnTimer();
+    //
     void updateNumConnections(int numConnections);
     void updateNetworkActive(bool networkActive);
     void updateAlert();
