@@ -146,6 +146,9 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "setban", 3, "absolute" },
     { "setnetworkactive", 0, "state" },
     { "setwalletflag", 1, "value" },
+    // Dash
+    { "spork", 1, "value" },
+    //
     { "getmempoolancestors", 1, "verbose" },
     { "getmempooldescendants", 1, "verbose" },
     { "bumpfee", 1, "options" },
