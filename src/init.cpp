@@ -578,7 +578,7 @@ void SetupServerArgs()
     gArgs.AddArg("-blockmaxweight=<n>", strprintf("Set maximum BIP141 block weight (default: %d)", DEFAULT_BLOCK_MAX_WEIGHT), ArgsManager::ALLOW_ANY, OptionsCategory::BLOCK_CREATION);
     gArgs.AddArg("-blockmintxfee=<amt>", strprintf("Set lowest fee rate (in %s/kB) for transactions to be included in block creation. (default: %s)", CURRENCY_UNIT, FormatMoney(DEFAULT_BLOCK_MIN_TX_FEE)), ArgsManager::ALLOW_ANY, OptionsCategory::BLOCK_CREATION);
     gArgs.AddArg("-blockversion=<n>", "Override block version to test forking scenarios", ArgsManager::ALLOW_ANY | ArgsManager::DEBUG_ONLY, OptionsCategory::BLOCK_CREATION);
-    gArgs.AddArg("-algo=<algo>", strprintf("Mining algorithm: sha256d, scrypt, nist5, lyra2z, x11 (default: sha256d)"), false, OptionsCategory::BLOCK_CREATION);
+    gArgs.AddArg("-algo=<algo>", strprintf("Mining algorithm: sha256d, scrypt, lyra2z, x11, x16r (default: sha256d)"), false, OptionsCategory::BLOCK_CREATION);
 
     gArgs.AddArg("-rest", strprintf("Accept public REST requests (default: %u)", DEFAULT_REST_ENABLE), ArgsManager::ALLOW_ANY, OptionsCategory::RPC);
     gArgs.AddArg("-rpcallowip=<ip>", "Allow JSON-RPC connections from specified source. Valid for <ip> are a single IP (e.g. 1.2.3.4), a network/netmask (e.g. 1.2.3.4/255.255.255.0) or a network/CIDR (e.g. 1.2.3.4/24). This option can be specified multiple times", ArgsManager::ALLOW_ANY, OptionsCategory::RPC);
@@ -1235,6 +1235,8 @@ bool AppInitParameterInteraction()
          miningAlgo = ALGO_LYRA2Z;
     else if (strAlgo == "x11")
          miningAlgo = ALGO_X11;
+    else if (strAlgo == "x16r")
+         miningAlgo = ALGO_X16R;
     else
          miningAlgo = ALGO_SHA256D; // FXTC TODO: we should not be here
     // FXTC END
