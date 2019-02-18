@@ -22,6 +22,9 @@
 #include <util/translation.h>
 
 #include <functional>
+// VELES BEGIN
+#include <masternodeconfig.h>
+// VELES END
 
 const std::function<std::string(const char*)> G_TRANSLATION_FUN = nullptr;
 
@@ -89,6 +92,17 @@ static bool AppInit(int argc, char* argv[])
         } catch (const std::exception& e) {
             return InitError(strprintf("%s\n", e.what()));
         }
+
+        // VELES BEGIN
+        // Dash
+        // parse masternode.conf
+        std::string strErr;
+        if(!masternodeConfig.read(strErr)) {
+            fprintf(stderr,"Error reading masternode configuration file: %s\n", strErr.c_str());
+            return false;
+        }
+        //
+        // VELES END
 
         // Error out when loose non-argument tokens are encountered on command line
         for (int i = 1; i < argc; i++) {
