@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2018 The Bitcoin Core developers
 // Copyright (c) 2014-2017 The Dash Core developers
-// Copyright (c) 2018 FXTC developers
+// Copyright (c) 2018-2019 FXTC developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -1283,8 +1283,18 @@ int GetNumCores()
 
 std::string CopyrightHolders(const std::string& strPrefix)
 {
+    // FXTC BEGIN
     const auto copyright_devs = strprintf(_(COPYRIGHT_HOLDERS).translated, COPYRIGHT_HOLDERS_SUBSTITUTION);
     std::string strCopyrightHolders = strPrefix + copyright_devs;
+    //std::string strCopyrightHolders = strPrefix + strprintf(" %u-%u ", 2009, COPYRIGHT_YEAR) + "The Bitcoin Core developers";
+    strCopyrightHolders += "\n" + strPrefix + strprintf(" %u-%u ", 2014, 2018) + "The Dash Core developers";
+    strCopyrightHolders += "\n" + strPrefix + strprintf(" %u-%u ", 2014, 2018) + "The Talkcoin developers";
+    strCopyrightHolders += "\n" + strPrefix + strprintf(" %u-%u ", 2017, 2018) + "The Zcoin developers";
+    strCopyrightHolders += "\n" + strPrefix + strprintf(" %u-%u ", 2017, 2018) + "The PIVX developers";
+    strCopyrightHolders += "\n" + strPrefix + strprintf(" %u-%u ", 2018, 2019) + "The Veles Core developers";
+    strCopyrightHolders += "\n" + strPrefix + strprintf(" %u-%u ", 2018, COPYRIGHT_YEAR) + strprintf(_(COPYRIGHT_HOLDERS), _(COPYRIGHT_HOLDERS_SUBSTITUTION));
+    // FXTC END
+
 
     // Make sure Bitcoin Core copyright is not removed by accident
     if (copyright_devs.find("Bitcoin Core") == std::string::npos) {
