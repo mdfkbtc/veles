@@ -81,10 +81,11 @@ public:
         consensus.nMinimumSubsidy = 0.00100000 * COIN;
         consensus.nMasternodeMinimumConfirmations = 15;
 	    consensus.nMasternodePaymentsStartBlock = 50;
-        consensus.nMasternodeCollateralMinimum = 2000;
-        consensus.nMasternodeCollateralMaximum = 2000;
 //      consensus.nMasternodePaymentsIncreaseBlock = 50;    // In Veles is VCIP01 block
         consensus.nMasternodePaymentsIncreasePeriod = 365 * 576 * 5; // 5 years, activated with VCIP01
+        consensus.nMasternodeCollateralMinimum = 2000; // starting MN collateral
+        consensus.nMasternodeCollateralMaximum = 2000; // MN collateral at infinity
+        consensus.nMasternodeCollateral201908  = 500;  // MN collateral
         // VELES BEGIN
         consensus.nMasternodePaymentsStartPercent =  5;     // at VCIP01 this should equal to approx same VLS amount as before
         consensus.nMasternodePaymentsFinalPercent =  60;    // will be reached in ca 5 years
@@ -247,6 +248,7 @@ public:
         consensus.nMasternodePaymentsIncreasePeriod = 25;
         consensus.nMasternodeCollateralMinimum = 10; // starting MN collateral
         consensus.nMasternodeCollateralMaximum = 1000; // MN collateral at infinity
+        consensus.nMasternodeCollateral201908  = 500; // MN collateral
         // VELES BEGIN
         consensus.nMasternodePaymentsStartPercent =  5;
         consensus.nMasternodePaymentsFinalPercent =  60; // will be reached in ca 5 yrs
@@ -392,6 +394,7 @@ public:
         consensus.nMasternodePaymentsIncreasePeriod = 10;
         consensus.nMasternodeCollateralMinimum = 1; // starting MN collateral
         consensus.nMasternodeCollateralMaximum = 100; // MN collateral at infinity
+        consensus.nMasternodeCollateral201908  = 500; // MN collateral
         // VELES BEGIN
         consensus.nMasternodePaymentsStartPercent =  5;
         consensus.nMasternodePaymentsFinalPercent =  60; // will be reached in ca 5 yrs
