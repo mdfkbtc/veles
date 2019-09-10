@@ -10,14 +10,19 @@ About Veles
 ------------
 Veles Core is innovative cryptocurrency supporting multiple PoW algorithms, with unique dynamic block reward system. Main goal of the project is to implement decentralised VPN solution to protect privacy and anonymity of Internet users around the globe.
 
+OldStable 0.17 "Aged Amnesia" branch
+------------------------------------
+This is an oldstable branch of Veles Core, **oldstable** is a codename for the previous Veles Core stable repository, as long as security and consensus updates are provided. 
+It is useful if you still need to use some of the deprecated features that has been removed from the latest version. For example, 0.17.x is the last version with support for old "account" functionality, which has been removed in the 0.18, although this also needs to be explicitly enabled in the config using `deprecatedrpc=account`.
+
 
 Build Instructions and Notes
 -----------------------------
-1.  Clone the repository and checkout to latest stable release using following commands. (Alternatively you can download and extract the latest source tarball manually from [Releases](https://github.com/velescore/veles/releases) page on our GitHub.)
+1.  Clone the repository and checkout to latest stable 0.17.x release using following commands. (Alternatively you can download and extract the latest source tarball manually from [Releases](https://github.com/velescore/veles/releases) page on our GitHub.)
 
         git clone https://github.com/velescore/veles.git
         cd veles
-        git checkout `git tag | sort -V | grep -v "\-rc" | tail -1`
+        git checkout `git tag | sort -V | grep "0\.17" | grep -v "\-rc" | tail -1`
 
 2.  Build Veles Core:
     Configure and build the headless Veles Core binaries as well as the GUI (if Qt is found).
