@@ -36,7 +36,7 @@
 #include <governance.h>
 #include <instantx.h>
 #include <keepass.h>
-#include <privatesend-client.h>
+#include <privatesend/privatesend-client.h>
 #include <spork.h>
 
 #include <algorithm>
@@ -2597,7 +2597,7 @@ CAmount CWallet::GetAnonymizedBalance() const
 
     return nTotal;
 }
-/*
+
 // Note: calculated including unconfirmed,
 // that's ok as long as we use it for informational purposes only
 float CWallet::GetAverageAnonymizedRounds() const
@@ -2618,8 +2618,8 @@ float CWallet::GetAverageAnonymizedRounds() const
     if(nCount == 0) return 0;
 
     return (float)nTotal/nCount;
-}*/
-/*
+}
+
 // Note: calculated including unconfirmed,
 // that's ok as long as we use it for informational purposes only
 CAmount CWallet::GetNormalizedAnonymizedBalance() const
@@ -2628,19 +2628,20 @@ CAmount CWallet::GetNormalizedAnonymizedBalance() const
 
     CAmount nTotal = 0;
 
+    auto locked_chain = chain().lock();
     LOCK2(cs_main, cs_wallet);
     for (auto& outpoint : setWalletUTXO) {
         map<uint256, CWalletTx>::const_iterator it = mapWallet.find(outpoint.hash);
         if (it == mapWallet.end()) continue;
         if (!IsDenominated(outpoint)) continue;
-        if (it->second.GetDepthInMainChain() < 0) continue;
+        if (it->second.GetDepthInMainChain(*locked_chain) < 0) continue;
 
         int nRounds = GetOutpointPrivateSendRounds(outpoint);
-        nTotal += it->second.vout[outpoint.n].nValue * nRounds / privateSendClient.nPrivateSendRounds;
+        nTotal += it->second.tx->vout[outpoint.n].nValue * nRounds / privateSendClient.nPrivateSendRounds;
     }
 
     return nTotal;
-}*/
+}
 
 CAmount CWallet::GetNeedsToBeAnonymizedBalance(CAmount nMinBalance) const
 {
@@ -4376,6 +4377,16 @@ bool CWallet::CreateTransaction(interfaces::Chain::Lock& locked_chain, const std
     return true;
 }
 
+bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CTransactionRef& tx, CReserveKey& reservekey, CAmount& nFeeRet,
+                                int& nChangePosInOut, std::string& strFailReason, const CCoinControl& coin_control, bool sign, AvailableCoinsType nCoinType, bool fUseInstantSend)
+{
+    {
+        auto locked_chain = chain().lock();
+        LOCK(cs_wallet);
+        return CreateTransaction(*locked_chain, vecSend, tx, reservekey, nFeeRet, nChangePosInOut, strFailReason, coin_control, sign, nCoinType, fUseInstantSend);
+    }
+}
+
 /**
  * Call after CreateTransaction unless you want to abort
  */
@@ -4431,6 +4442,12 @@ bool CWallet::CommitTransaction(CTransactionRef tx, mapValue_t mapValue, std::ve
         }
     }
     return true;
+}
+
+bool CWallet::CommitTransaction(CTransactionRef tx, CReserveKey& reservekey, CConnman* connman, CValidationState& state)
+{
+    mapValue_t mapValue;
+    return CommitTransaction(tx, std::move(mapValue), {}, reservekey, connman, state);
 }
 
 DBErrors CWallet::LoadWallet(bool& fFirstRunRet)

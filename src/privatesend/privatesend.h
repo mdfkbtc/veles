@@ -1,10 +1,9 @@
 // Copyright (c) 2014-2017 The Dash Core developers
-// Copyright (c) 2018-2019 FXTC developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DASH_PRIVATESEND_H
-#define DASH_PRIVATESEND_H
+#ifndef PRIVATESEND_H
+#define PRIVATESEND_H
 
 #include <chain.h>
 #include <chainparams.h>
@@ -326,7 +325,7 @@ public:
     static std::vector<CAmount> GetStandardDenominations() { return vecStandardDenominations; }
     static CAmount GetSmallestDenomination() { return vecStandardDenominations.back(); }
 
-    /// Get the denominations for a specific amount of dash.
+    /// Get the denominations for a specific amount of bitcoin.
     static int GetDenominationsByAmounts(const std::vector<CAmount>& vecAmount);
 
     static bool IsDenominatedAmount(CAmount nInputAmount);
@@ -359,4 +358,4 @@ public:
 
 void ThreadCheckPrivateSend(CConnman& connman);
 
-#endif // DASH_PRIVATESEND_H
+#endif

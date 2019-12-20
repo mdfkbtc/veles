@@ -20,11 +20,13 @@
 #include <checkpoints.h>
 #include <compat/sanity.h>
 #include <consensus/validation.h>
+#include <dsnotificationinterface.h>
 #include <fs.h>
 #include <httpserver.h>
 #include <httprpc.h>
 #include <interfaces/chain.h>
 #include <index/txindex.h>
+#include <instantx.h>
 #include <key.h>
 #include <key_io.h>
 #include <validation.h>
@@ -35,6 +37,8 @@
 #include <policy/feerate.h>
 #include <policy/fees.h>
 #include <policy/policy.h>
+#include <privatesend/privatesend-client.h>
+#include <privatesend/privatesend-server.h>
 #include <rpc/server.h>
 #include <rpc/register.h>
 #include <rpc/blockchain.h>
@@ -58,10 +62,8 @@
 
 // Dash
 #include <activemasternode.h>
-#include <dsnotificationinterface.h>
 #include <flat-database.h>
 #include <governance.h>
-#include <instantx.h>
 #ifdef ENABLE_WALLET
 #include <keepass.h>
 #endif
@@ -71,10 +73,6 @@
 #include <masternodeconfig.h>
 #include <messagesigner.h>
 #include <netfulfilledman.h>
-#ifdef ENABLE_WALLET
-#include <privatesend-client.h>
-#endif // ENABLE_WALLET
-#include <privatesend-server.h>
 #include <spork.h>
 //
 

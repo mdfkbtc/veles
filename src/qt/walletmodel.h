@@ -244,7 +244,7 @@ public:
 
     QString getWalletName() const;
     QString getDisplayName() const;
-
+    int getNumISLocks() const;
     bool isMultiwallet();
 
     AddressTableModel* getAddressTableModel() const { return addressTableModel; }
@@ -258,7 +258,6 @@ private:
     std::unique_ptr<interfaces::Handler> m_handler_watch_only_changed;
     std::unique_ptr<interfaces::Handler> m_handler_can_get_addrs_changed;
     interfaces::Node& m_node;
-
     bool fHaveWatchOnly;
     bool fForceCheckBalanceChanged{false};
 
@@ -274,6 +273,8 @@ private:
     interfaces::WalletBalances m_cached_balances;
     EncryptionStatus cachedEncryptionStatus;
     int cachedNumBlocks;
+    int cachedNumISLocks;
+    int cachedPrivateSendRounds;
 
     QTimer *pollTimer;
 
@@ -316,6 +317,8 @@ public Q_SLOTS:
     void updateStatus();
     /* New transaction, or transaction changed status */
     void updateTransaction();
+    /* IS-Lock received */
+    void updateNumISLocks();
     /* New, updated or removed address book entry */
     void updateAddressBook(const QString &address, const QString &label, bool isMine, const QString &purpose, int status);
     /* Watch-only added */

@@ -1,9 +1,8 @@
 // Copyright (c) 2014-2017 The Dash Core developers
-// Copyright (c) 2018-2019 FXTC developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#include <privatesend-server.h>
 
+#include <privatesend/privatesend-server.h>
 #include <activemasternode.h>
 #include <consensus/validation.h>
 #include <core_io.h>
@@ -12,9 +11,7 @@
 #include <masternodeman.h>
 #include <netmessagemaker.h>
 #include <script/interpreter.h>
-// FXTC BEGIN
 #include <shutdown.h>
-// FXTC END
 #include <txmempool.h>
 #include <util/system.h>
 #include <util/moneystr.h>
@@ -221,7 +218,6 @@ void CPrivateSendServer::ProcessMessage(CNode* pfrom, const std::string& strComm
                 LOCK(cs_main);
                 CValidationState validationState;
                 mempool.PrioritiseTransaction(tx.GetHash(), 0.1*COIN);
-                // FXTC TODO: if(!AcceptToMemoryPool(mempool, validationState, CTransaction(tx), false, NULL, false, true, true)) {
                 if(!AcceptToMemoryPool(mempool, validationState, MakeTransactionRef(tx), nullptr, NULL, false, maxTxFee)) {
                     LogPrintf("DSVIN -- transaction not valid! tx=%s\n", tx.ToString());
                     PushStatus(pfrom, STATUS_REJECTED, ERR_INVALID_TX, connman);
@@ -565,7 +561,6 @@ bool CPrivateSendServer::IsInputScriptSigValid(const CTxIn& txin)
     if(nTxInIndex >= 0) { //might have to do this one input at a time?
         txNew.vin[nTxInIndex].scriptSig = txin.scriptSig;
         LogPrint(BCLog::PRIVATESEND, "CPrivateSendServer::IsInputScriptSigValid -- verifying scriptSig %s\n", ScriptToAsmStr(txin.scriptSig).substr(0,24));
-        // FXTC TODO: if(!VerifyScript(txNew.vin[nTxInIndex].scriptSig, sigPubKey, SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_STRICTENC, MutableTransactionSignatureChecker(&txNew, nTxInIndex))) {
         if(!VerifyScript(txNew.vin[nTxInIndex].scriptSig, sigPubKey, &txNew.vin[nTxInIndex].scriptWitness , SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_STRICTENC, MutableTransactionSignatureChecker(&txNew, nTxInIndex, txNew.vout[0].nValue))) {
             LogPrint(BCLog::PRIVATESEND, "CPrivateSendServer::IsInputScriptSigValid -- VerifyScript() failed on input %d\n", nTxInIndex);
             return false;

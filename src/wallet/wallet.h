@@ -26,7 +26,7 @@
 #include <wallet/walletutil.h>
 
 // Dash
-#include <privatesend.h>
+#include <privatesend/privatesend.h>
 //
 
 #include <algorithm>
@@ -1123,8 +1123,8 @@ public:
     // Dash
     CAmount GetAnonymizableBalance(bool fSkipDenominated = false, bool fSkipUnconfirmed = true) const;
     CAmount GetAnonymizedBalance() const;
-    //-//float GetAverageAnonymizedRounds() const;
-    //-//CAmount GetNormalizedAnonymizedBalance() const;
+    float GetAverageAnonymizedRounds() const;
+    CAmount GetNormalizedAnonymizedBalance() const;
     CAmount GetNeedsToBeAnonymizedBalance(CAmount nMinBalance = 0) const;
     CAmount GetDenominatedBalance(bool unconfirmed=false) const;
 
@@ -1148,10 +1148,15 @@ public:
                            //std::string& strFailReason, const CCoinControl& coin_control, bool sign = true);
                            std::string& strFailReason, const CCoinControl& coin_control, bool sign = true, AvailableCoinsType nCoinType = ALL_COINS, bool fUseInstantSend = false);
                            //
+
+    bool CreateTransaction(const std::vector<CRecipient>& vecSend, CTransactionRef& tx, CReserveKey& reservekey, CAmount& nFeeRet,
+                                int& nChangePosInOut, std::string& strFailReason, const CCoinControl& coin_control, bool sign = true, AvailableCoinsType nCoinType = ALL_COINS, bool fUseInstantSend = false);
+
     // Dash
     //bool CommitTransaction(CTransactionRef tx, mapValue_t mapValue, std::vector<std::pair<std::string, std::string>> orderForm, CReserveKey& reservekey, CConnman* connman, CValidationState& state);
     bool CommitTransaction(CTransactionRef tx, mapValue_t mapValue, std::vector<std::pair<std::string, std::string>> orderForm, CReserveKey& reservekey, CConnman* connman, CValidationState& state, std::string strCommand = NetMsgType::TX);
     //
+    bool CommitTransaction(CTransactionRef tx, CReserveKey& reservekey, CConnman* connman, CValidationState& state);
 
     // Dash
     bool CreateCollateralTransaction(CMutableTransaction& txCollateral, std::string& strReason);

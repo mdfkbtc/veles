@@ -1,30 +1,26 @@
 // Copyright (c) 2014-2017 The Dash Core developers
-// Copyright (c) 2018-2019 FXTC developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DASH_PRIVATESEND_CLIENT_H
-#define DASH_PRIVATESEND_CLIENT_H
+#ifndef PRIVATESENDCLIENT_H
+#define PRIVATESENDCLIENT_H
 
 #include <masternode.h>
-#include <privatesend.h>
+#include <privatesend/privatesend.h>
 #include <wallet/wallet.h>
-#include <privatesend-util.h>
+#include <privatesend/privatesend-util.h>
+#include <interfaces/chain.h>
+#include <interfaces/node.h>
 
 class CPrivateSendClient;
 class CConnman;
 
 static const int DENOMS_COUNT_MAX                   = 100;
-
 static const int DEFAULT_PRIVATESEND_ROUNDS         = 2;
 static const int DEFAULT_PRIVATESEND_AMOUNT         = 1000;
 static const int DEFAULT_PRIVATESEND_LIQUIDITY      = 0;
 static const bool DEFAULT_PRIVATESEND_MULTISESSION  = false;
-
-// Warn user if mixing in gui or try to create backup if mixing in daemon mode
-// when we have only this many keys left
 static const int PRIVATESEND_KEYS_THRESHOLD_WARNING = 100;
-// Stop mixing completely, it's too dangerous to continue when we have only this many keys left
 static const int PRIVATESEND_KEYS_THRESHOLD_STOP    = 50;
 
 // The main object for accessing mixing
@@ -128,7 +124,6 @@ public:
 
     void SetMinBlocksToWait(int nMinBlocksToWaitIn) { nMinBlocksToWait = nMinBlocksToWaitIn; }
 
-
     void ResetPool();
 
     void UnlockCoins();
@@ -148,4 +143,4 @@ public:
 
 void ThreadCheckPrivateSendClient(CConnman& connman);
 
-#endif // DASH_PRIVATESEND_CLIENT_H
+#endif

@@ -1,8 +1,7 @@
 // Copyright (c) 2014-2017 The Dash Core developers
-// Copyright (c) 2018-2019 FXTC developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#include <privatesend-client.h>
+#include <privatesend/privatesend-client.h>
 
 #include <wallet/coincontrol.h>
 #include <consensus/validation.h>
@@ -13,9 +12,7 @@
 #include <netmessagemaker.h>
 #include <reverse_iterator.h>
 #include <script/sign.h>
-// FXTC BEGIN
 #include <shutdown.h>
-// FXTC END
 #include <txmempool.h>
 #include <util/system.h>
 #include <util/moneystr.h>
@@ -428,7 +425,6 @@ bool CPrivateSendClient::SendDenominate(const std::vector<CTxDSIn>& vecTxDSIn, c
 
         mempool.PrioritiseTransaction(tx.GetHash(), 0.1*COIN);
         TRY_LOCK(cs_main, lockMain);
-        // FXTC TODO: if(!lockMain || !AcceptToMemoryPool(mempool, validationState, CTransaction(tx), false, NULL, false, true, true)) {
         if(!lockMain || !AcceptToMemoryPool(mempool, validationState, MakeTransactionRef(tx), nullptr, NULL, false, maxTxFee)) {
             LogPrintf("CPrivateSendClient::SendDenominate -- AcceptToMemoryPool() failed! tx=%s\n", tx.ToString());
             UnlockCoins();
@@ -668,8 +664,6 @@ bool CPrivateSendClient::CheckAutomaticBackup()
             std::string warningString;
             std::string errorString;
 
-            // FXTC TODO: enable after autobackupwallet implemented
-            //if(!AutoBackupWallet(pwallet, "", warningString, errorString)) {
             if (false) {
                 if(!warningString.empty()) {
                     // There were some issues saving backup but yet more or less safe to continue
@@ -896,18 +890,13 @@ bool CPrivateSendClient::JoinExistingQueue(CAmount nBalanceNeedsAnonymized, CCon
 
         vecMasternodesUsed.push_back(dsq.vin.prevout);
 
-        // FXTC TODO:
         if (connman.ForNode(infoMn.addr, CConnman::AllNodesExceptMasternodes)) {
             LogPrintf("CPrivateSendClient::JoinExistingQueue -- skipping masternode connection, addr=%s\n", infoMn.addr.ToString());
             continue;
         }
 
         LogPrintf("CPrivateSendClient::JoinExistingQueue -- attempt to connect to masternode from queue, addr=%s\n", infoMn.addr.ToString());
-        // connect to Masternode and submit the queue request
-        // FXTC BEGIN
-        //CNode* pnode = connman.ConnectNode(CAddress(infoMn.addr, NODE_NETWORK), NULL, false, true);
         CNode *pnode = g_connman->OpenNetworkConnection(CAddress(infoMn.addr, NODE_NETWORK), false, nullptr, NULL, false, false, false, true);
-        // FXTC END
         if(pnode) {
             infoMixingMasternode = infoMn;
             nSessionDenom = dsq.nDenom;
@@ -965,7 +954,6 @@ bool CPrivateSendClient::StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsA
             continue;
         }
 
-        // FXTC TODO:
         if (connman.ForNode(infoMn.addr, CConnman::AllNodesExceptMasternodes)) {
             LogPrintf("CPrivateSendClient::StartNewQueue -- skipping masternode connection, addr=%s\n", infoMn.addr.ToString());
             nTries++;
@@ -973,10 +961,7 @@ bool CPrivateSendClient::StartNewQueue(CAmount nValueMin, CAmount nBalanceNeedsA
         }
 
         LogPrintf("CPrivateSendClient::StartNewQueue -- attempt %d connection to Masternode %s\n", nTries, infoMn.addr.ToString());
-        // FXTC BEGIN
-        //CNode* pnode = connman.ConnectNode(CAddress(infoMn.addr, NODE_NETWORK), NULL, false, true);
         CNode *pnode = g_connman->OpenNetworkConnection(CAddress(infoMn.addr, NODE_NETWORK), false, nullptr, NULL, false, false, false, true);
-        // FXTC END
         if(pnode) {
             LogPrintf("CPrivateSendClient::StartNewQueue -- connected, addr=%s\n", infoMn.addr.ToString());
             infoMixingMasternode = infoMn;
@@ -1201,9 +1186,6 @@ bool CPrivateSendClient::MakeCollateralAmounts(const CompactTallyItem& tallyItem
     std::vector<std::shared_ptr<CWallet>> wallets = GetWallets();
     CWallet * const pwallet = (wallets.size() > 0) ? wallets[0].get() : nullptr;
 
-    // FXTC BEGIN
-    auto locked_chain = pwallet->chain().lock();
-    //
     LOCK2(cs_main, pwallet->cs_wallet);
 
     // denominated input is always a single one, so we can check its amount directly and return early
@@ -1237,20 +1219,13 @@ bool CPrivateSendClient::MakeCollateralAmounts(const CompactTallyItem& tallyItem
     for (const auto& txin : tallyItem.vecTxIn)
         coinControl.Select(txin.prevout);
 
-    // FXTC BEGIN
-    //bool fSuccess = pwallet->CreateTransaction(vecSend, tx_New, reservekeyChange,
-    bool fSuccess = pwallet->CreateTransaction(*locked_chain, vecSend, tx_New, reservekeyChange,
-    // FXTC END
-            nFeeRet, nChangePosRet, strFail, coinControl, true, ONLY_NONDENOMINATED);
+    bool fSuccess = pwallet->CreateTransaction(vecSend, tx_New, reservekeyChange, nFeeRet, nChangePosRet, strFail, coinControl, true, ONLY_NONDENOMINATED);
     if(!fSuccess) {
         LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- ONLY_NONDENOMINATED: %s\n", strFail);
         // If we failed then most likeky there are not enough funds on this address.
         if(fTryDenominated) {
             // Try to also use denominated coins (we can't mix denominated without collaterals anyway).
-            // FXTC BEGIN
-            // if(!pwallet->CreateTransaction(vecSend, tx_New, reservekeyChange,
-            if(!pwallet->CreateTransaction(*locked_chain, vecSend, tx_New, reservekeyChange,
-            // FXTC END
+            if(!pwallet->CreateTransaction(vecSend, tx_New, reservekeyChange,
                                 nFeeRet, nChangePosRet, strFail, coinControl, true, ALL_COINS)) {
                 LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- ALL_COINS Error: %s\n", strFail);
                 reservekeyCollateral.ReturnKey();
@@ -1269,10 +1244,7 @@ bool CPrivateSendClient::MakeCollateralAmounts(const CompactTallyItem& tallyItem
 
     // use the same nCachedLastSuccessBlock as for DS mixinx to prevent race
     CValidationState state;
-    // FXTC BEGIN
-    //if(!pwallet->CommitTransaction(tx_New, std::move(mapValue), {} /* orderForm */, std::move(fromAccount), reservekeyChange, &connman, state)) {
-    if(!pwallet->CommitTransaction(tx_New, std::move(mapValue), {} /* orderForm */, reservekeyChange, &connman, state)) {
-    // FXTC END
+    if (!pwallet->CommitTransaction(tx_New, reservekeyChange, &connman, state)) {
         LogPrintf("CPrivateSendClient::MakeCollateralAmounts -- CommitTransaction failed! Reason given: %s\n", state.GetRejectReason());
         return false;
     }
@@ -1388,10 +1360,6 @@ bool CPrivateSendClient::CreateDenominated(const CompactTallyItem& tallyItem, bo
     for (const auto& txin : tallyItem.vecTxIn)
         coinControl.Select(txin.prevout);
 
-    // FXTC BEGIN
-    auto locked_chain = pwallet->chain().lock();
-    LOCK(pwallet->cs_wallet);
-    // FXTC END
     CTransactionRef tx_New;
     CAmount nFeeRet = 0;
     int nChangePosRet = -1;
@@ -1399,10 +1367,7 @@ bool CPrivateSendClient::CreateDenominated(const CompactTallyItem& tallyItem, bo
     // make our change address
     CReserveKey reservekeyChange(pwallet);
 
-    // FXTC BEGIN
-    //bool fSuccess = pwallet->CreateTransaction(vecSend, tx_New, reservekeyChange,
-    bool fSuccess = pwallet->CreateTransaction(*locked_chain, vecSend, tx_New, reservekeyChange,
-    // FXTC END
+    bool fSuccess = pwallet->CreateTransaction(vecSend, tx_New, reservekeyChange,
             nFeeRet, nChangePosRet, strFail, coinControl, true, ONLY_NONDENOMINATED);
     if(!fSuccess) {
         LogPrintf("CPrivateSendClient::CreateDenominated -- Error: %s\n", strFail);
@@ -1413,10 +1378,7 @@ bool CPrivateSendClient::CreateDenominated(const CompactTallyItem& tallyItem, bo
     keyHolderStorageDenom.KeepAll();
 
     CValidationState state;
-    // FXTC BEGIN
-    //if(!pwallet->CommitTransaction(tx_New, std::move(mapValue), {} /* orderForm */, std::move(fromAccount), reservekeyChange, &connman, state)) {
-    if(!pwallet->CommitTransaction(tx_New, std::move(mapValue), {} /* orderForm */, reservekeyChange, &connman, state)) {
-    // FXTC END
+    if (!pwallet->CommitTransaction(tx_New, reservekeyChange, &connman, state)) {
         LogPrintf("CPrivateSendClient::CreateDenominated -- CommitTransaction failed! Reason given: %s\n", state.GetRejectReason());
         return false;
     }

@@ -10,9 +10,9 @@
 #include <masternodeman.h>
 #include <masternode-payments.h>
 #include <masternode-sync.h>
-#include <privatesend.h>
+#include <privatesend/privatesend.h>
 #ifdef ENABLE_WALLET
-#include <privatesend-client.h>
+#include <privatesend/privatesend-client.h>
 #endif // ENABLE_WALLET
 
 void CDSNotificationInterface::InitializeCurrentBlockTip()

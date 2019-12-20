@@ -132,6 +132,7 @@ BITCOIN_CORE_H = \
   core_io.h \
   core_memusage.h \
   cuckoocache.h \
+  dsnotificationinterface.h \
   fs.h \
   httprpc.h \
   httpserver.h \
@@ -139,6 +140,7 @@ BITCOIN_CORE_H = \
   index/txindex.h \
   indirectmap.h \
   init.h \
+  instantx.h \
   interfaces/chain.h \
   interfaces/handler.h \
   interfaces/node.h \
@@ -168,6 +170,10 @@ BITCOIN_CORE_H = \
   pow.h \
   protocol.h \
   psbt.h \
+  privatesend/privatesend.h \
+  privatesend/privatesend-client.h \
+  privatesend/privatesend-server.h \
+  privatesend/privatesend-util.h \
   random.h \
   reverse_iterator.h \
   reverselock.h \
@@ -256,10 +262,6 @@ BITCOIN_CORE_H += \
   masternodeconfig.h \
   messagesigner.h \
   netfulfilledman.h \
-  privatesend.h \
-  privatesend-client.h \
-  privatesend-server.h \
-  privatesend-util.h \
   spork.h \
   sporkdb.h
 
@@ -303,6 +305,8 @@ libbitcoin_server_a_SOURCES = \
   policy/policy.cpp \
   policy/rbf.cpp \
   pow.cpp \
+  privatesend/privatesend.cpp \
+  privatesend/privatesend-server.cpp \
   rest.cpp \
   rpc/blockchain.cpp \
   rpc/mining.cpp \
@@ -341,8 +345,6 @@ libbitcoin_server_a_SOURCES += \
   masternodeconfig.cpp \
   messagesigner.cpp \
   netfulfilledman.cpp \
-  privatesend.cpp \
-  privatesend-server.cpp \
   rpc/governance.cpp \
   rpc/masternode.cpp \
   spork.cpp \
@@ -370,6 +372,8 @@ libbitcoin_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 libbitcoin_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_wallet_a_SOURCES = \
   interfaces/wallet.cpp \
+  privatesend/privatesend-client.cpp \
+  privatesend/privatesend-util.cpp \
   wallet/coincontrol.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \
@@ -387,10 +391,7 @@ libbitcoin_wallet_a_SOURCES = \
 
 # dash wallet
 libbitcoin_wallet_a_SOURCES += \
-  keepass.cpp \
-  privatesend-client.cpp \
-  privatesend-util.cpp
-#
+  keepass.cpp
 
 libbitcoin_wallet_tool_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 libbitcoin_wallet_tool_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)

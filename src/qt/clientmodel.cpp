@@ -28,7 +28,7 @@
 // Dash
 #include <masternodeman.h>
 #include <masternode-sync.h>
-#include <privatesend.h>
+#include <privatesend/privatesend.h>
 //
 
 // VELES BEGIN
@@ -100,7 +100,12 @@ QString ClientModel::getMasternodeCountString() const
             // .arg(QString::number((int)mnodeman.CountByIP(NET_IPV6)))
             // .arg(QString::number((int)mnodeman.CountByIP(NET_TOR)));
 }
-//
+
+int ClientModel::getNumBlocks() const
+{
+    LOCK(cs_main);
+    return chainActive.Height();
+}
 
 int ClientModel::getHeaderTipHeight() const
 {

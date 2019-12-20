@@ -1,9 +1,8 @@
 // Copyright (c) 2014-2017 The Dash Core developers
-// Copyright (c) 2018-2019 FXTC developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#include <privatesend.h>
 
+#include <privatesend/privatesend.h>
 #include <activemasternode.h>
 #include <consensus/validation.h>
 #include <governance.h>
@@ -16,9 +15,7 @@
 #include <netmessagemaker.h>
 #include <reverse_iterator.h>
 #include <script/sign.h>
-// FXTC BEGIN
 #include <shutdown.h>
-// FXTC END
 #include <txmempool.h>
 #include <util/system.h>
 #include <util/moneystr.h>
@@ -219,7 +216,6 @@ bool CPrivateSend::IsCollateralValid(const CTransaction& txCollateral)
     {
         LOCK(cs_main);
         CValidationState validationState;
-        // FXTC TODO: if(!AcceptToMemoryPool(mempool, validationState, txCollateral, false, NULL, false, true, true)) {
         if(!AcceptToMemoryPool(mempool, validationState, MakeTransactionRef(txCollateral), nullptr, NULL, false, maxTxFee)) {
             LogPrint(BCLog::PRIVATESEND, "CPrivateSend::IsCollateralValid -- didn't pass AcceptToMemoryPool()\n");
             return false;
@@ -313,10 +309,10 @@ int CPrivateSend::GetDenominations(const std::vector<CTxOut>& vecTxOut, bool fSi
 bool CPrivateSend::GetDenominationsBits(int nDenom, std::vector<int> &vecBitsRet)
 {
     // ( bit on if present, 4 denominations example )
-    // bit 0 - 100DASH+1
-    // bit 1 - 10DASH+1
-    // bit 2 - 1DASH+1
-    // bit 3 - .1DASH+1
+    // bit 0 - 100Bitcoin+1
+    // bit 1 - 10Bitcoin+1
+    // bit 2 - 1Bitcoin+1
+    // bit 3 - .1Bitcoin+1
 
     int nMaxDenoms = vecStandardDenominations.size();
 
@@ -469,14 +465,6 @@ void ThreadCheckPrivateSend(CConnman& connman)
 
             // make sure to check all masternodes first
             mnodeman.Check();
-
-            // VELES BEGIN
-#if defined(ENABLE_WALLET) && defined(ENABLE_MN_HELPER)
-            // check whether remote masternodes in PRE_ENABLED state need to be re-activated, fixes veles#20
-            if(nTick % (MASTERNODE_MIN_MNP_SECONDS / 4) == 30)
-                mnodeman.CheckRemoteActivation(connman);
-#endif // defined(ENABLE_WALLET) && defined(ENABLE_MN_HELPER)
-            // VELES END
 
             // check if we should activate or ping every few minutes,
             // slightly postpone first run to give net thread a chance to connect to some peers
