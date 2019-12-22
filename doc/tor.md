@@ -1,4 +1,4 @@
-# TOR SUPPORT IN BITCOIN
+# TOR SUPPORT IN VELES CORE
 
 It is possible to run Veles Core as a Tor hidden service, and connect to such services.
 
