@@ -1,16 +1,18 @@
 Veles Core integration/staging tree
 ======================================
-![Licence](https://img.shields.io/github/license/velescore/veles.svg?style=for-the-badge)   ![Latest Release](https://img.shields.io/github/release/velescore/veles.svg?style=for-the-badge) ![Master Build Status](https://img.shields.io/travis/com/velescore/veles/master.svg?style=for-the-badge)
+![Master Build Status](https://img.shields.io/travis/com/velescore/veles/master.svg?style=for-the-badge) ![Latest Release](https://img.shields.io/github/release/velescore/veles.svg?style=for-the-badge) ![Licence](https://img.shields.io/github/license/velescore/veles.svg?style=for-the-badge)
 
 https://veles.network
 
 About Veles
 ------------
-Veles Core is innovative cryptocurrency supporting multiple PoW algorithms, with unique dynamic block reward system. Main goal of the project is to implement decentralised VPN solution to protect privacy and anonymity of Internet users around the globe.
+Veles Core is an open-source blockchain ecosystem providing services such as decentralized VPN in order to help people to defend their online privacy and free access to an information. 
+Backed by unique blockchain with features such dynamic block rewards and halving schedule, independent multi-algo PoW consensus and other approaches against 51% attacks, an insta-mine protection or a dead-lock protection. Designed as multi-tiered network building on the concept of self-incentivized Masternodes which provide robust service and governance layer.
 
 Stable 0.18 "Blockchain Baracuda" branch
 -----------------------------------------
-This is master branch of Veles Core, stable releases are marked with *git tags* and can cloned using commands below. If you still need, for some reason, to use oldstable branch 0.17 "Aged Amnesia", for which are security and consensus updates still provided, use the latest version from [0.17 branch](https://github.com/velescore/veles/tree/0.17).
+This is master branch of Veles Core wallet and blockhain node. For the service layer implementation refer to [Veles Masternode](https://github.com/velescore/veles-masternode) repository. 
+Stable releases are marked with *git tags* and can cloned using commands below. If you still need, for some reason, to use oldstable branch 0.17 "Aged Amnesia", for which are security and consensus updates still provided, use the latest version from [0.17 branch](https://github.com/velescore/veles/tree/0.17).
 
 Build Instructions and Notes
 -----------------------------
@@ -102,10 +104,4 @@ These tests can be run (if the [test dependencies](/test) are installed) with: `
 
 The Travis CI system makes sure that every pull request is built for Windows, Linux, and macOS, and that unit/sanity tests are run automatically.
 
-### Manual Quality Assurance (QA) Testing
-
-Changes should be tested by somebody other than the developer who wrote the
-code. This is especially important for large or high-risk changes. It is useful
-to add a test plan to the pull request description if testing the changes is
-not straightforward.
 
