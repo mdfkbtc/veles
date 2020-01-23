@@ -1159,8 +1159,8 @@ static UniValue addmultisigaddress(const JSONRPCRequest& request)
     }
 
     // Construct using pay-to-script-hash:
-    CScript inner;
-    CTxDestination dest = AddAndGetMultisigDestination(required, pubkeys, output_type, *pwallet, inner);
+    CScript inner = CreateMultisigRedeemscript(required, pubkeys);
+    CTxDestination dest = AddAndGetDestinationForScript(*pwallet, inner, output_type);
     pwallet->SetAddressBook(dest, label, "send");
 
     UniValue result(UniValue::VOBJ);
