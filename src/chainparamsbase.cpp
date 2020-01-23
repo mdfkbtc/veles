@@ -36,7 +36,7 @@ std::unique_ptr<CBaseChainParams> CreateBaseChainParams(const std::string& chain
     if (chain == CBaseChainParams::MAIN)
     // VELES BEGIN
     //return MakeUnique<CBaseChainParams>("", 9469);
-        return MakeUnique<CBaseChainParams>("", 5493);
+        return MakeUnique<CBaseChainParams>("", 21338);
     // VELES END
     else if (chain == CBaseChainParams::TESTNET)
     // VELES BEGIN
