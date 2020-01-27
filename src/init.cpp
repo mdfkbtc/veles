@@ -592,6 +592,7 @@ void SetupServerArgs()
     gArgs.AddArg("-blockmaxweight=<n>", strprintf("Set maximum BIP141 block weight (default: %d)", DEFAULT_BLOCK_MAX_WEIGHT), false, OptionsCategory::BLOCK_CREATION);
     gArgs.AddArg("-blockmintxfee=<amt>", strprintf("Set lowest fee rate (in %s/kB) for transactions to be included in block creation. (default: %s)", CURRENCY_UNIT, FormatMoney(DEFAULT_BLOCK_MIN_TX_FEE)), false, OptionsCategory::BLOCK_CREATION);
     gArgs.AddArg("-blockversion=<n>", "Override block version to test forking scenarios", true, OptionsCategory::BLOCK_CREATION);
+ 
     // VELES BEGIN
     gArgs.AddArg("-algo=<algo>", strprintf("Mining algorithm: sha256d, scrypt, lyra2z, x11, x16r (default: %s)", DEFAULT_MINING_ALGO.c_str()), false, OptionsCategory::BLOCK_CREATION);
     gArgs.AddArg("-rpcbackcompatible", strprintf("Support backward compatible syntax for certain RPC methods that miners or mining pools might still depend on (default: %u). Disable this option to keep strict %i.%i RPC syntax. Affected methods: getblocktemplate", DEFAULT_RPC_BACK_COMPATIBLE, CLIENT_VERSION_MAJOR, CLIENT_VERSION_MINOR), false, OptionsCategory::RPC);
@@ -619,8 +620,17 @@ void SetupServerArgs()
 
     // FXTC BEGIN
     // Dash
-    gArgs.AddArg("-masternode", "Run as masternode", false, OptionsCategory::DASH_FEATURES);
-    gArgs.AddArg("-masternodeprivkey", "Masternode private key", false, OptionsCategory::DASH_FEATURES);
+    gArgs.AddArg("-enableprivatesend", strprintf("Enable use of automated PrivateSend for funds stored in this wallet (0-1, default: %u)", 0), false, OptionsCategory::PRIVATESEND_FEATURES);
+    //gArgs.AddArg("-privatesendmultisession", strprintf("Enable multiple PrivateSend mixing sessions per block, experimental (0-1, default: %u)", DEFAULT_PRIVATESEND_MULTISESSION), false, OptionsCategory::PRIVATESEND_FEATURES);
+    //gArgs.AddArg("-privatesendsessions=<n>", strprintf("Use N separate masternodes in parallel to mix funds (%u-%u, default: %u)", MIN_PRIVATESEND_SESSIONS, MAX_PRIVATESEND_SESSIONS, DEFAULT_PRIVATESEND_SESSIONS), false, OptionsCategory::PRIVATESEND_FEATURES);
+    gArgs.AddArg("-privatesendrounds=<n>", strprintf("Use N separate masternodes for each denominated input to mix funds (%u-%u, default: %u)", MIN_PRIVATESEND_ROUNDS, MAX_PRIVATESEND_ROUNDS, DEFAULT_PRIVATESEND_ROUNDS), false, OptionsCategory::PRIVATESEND_FEATURES);
+    gArgs.AddArg("-privatesendamount=<n>", strprintf("Keep N VLS anonymized (%u-%u, default: %u)", MIN_PRIVATESEND_AMOUNT, MAX_PRIVATESEND_AMOUNT, DEFAULT_PRIVATESEND_AMOUNT), false, OptionsCategory::PRIVATESEND_FEATURES);
+    gArgs.AddArg("-privatesenddenoms=<n>", strprintf("Create up to N inputs of each denominated amount (allowed up to: %u)", DENOMS_COUNT_MAX), false, OptionsCategory::PRIVATESEND_FEATURES);
+    gArgs.AddArg("-liquidityprovider=<n>", strprintf("Provide liquidity to PrivateSend by infrequently mixing coins on a continual basis (%u-%u, default: %u, 1=very frequent, high fees, %u=very infrequent, low fees)",
+        MIN_PRIVATESEND_LIQUIDITY, MAX_PRIVATESEND_LIQUIDITY, DEFAULT_PRIVATESEND_LIQUIDITY, MAX_PRIVATESEND_LIQUIDITY), false, OptionsCategory::PRIVATESEND_FEATURES);
+    
+    gArgs.AddArg("-masternode", "Run as masternode", false, OptionsCategory::MASTERNODE_FEATURES);
+    gArgs.AddArg("-masternodeprivkey", "Masternode private key", false, OptionsCategory::MASTERNODE_FEATURES);
     hidden_args.emplace_back("-litemode");
     hidden_args.emplace_back("-sporkkey");
     //
@@ -1903,18 +1913,24 @@ bool AppInitMain(InitInterfaces& interfaces)
         }
     }
 
-    privateSendClient.nLiquidityProvider = std::min(std::max((int)gArgs.GetArg("-liquidityprovider", DEFAULT_PRIVATESEND_LIQUIDITY), 0), 100);
+    privateSendClient.nLiquidityProvider = std::min(std::max((int)gArgs.GetArg("-liquidityprovider", DEFAULT_PRIVATESEND_LIQUIDITY), MIN_PRIVATESEND_LIQUIDITY), MAX_PRIVATESEND_LIQUIDITY);
+    //privateSendClient.nLiquidityProvider = std::min(std::max((int)gArgs.GetArg("-liquidityprovider", DEFAULT_PRIVATESEND_LIQUIDITY), 0), 100);
+    int nMaxRounds = MAX_PRIVATESEND_ROUNDS;
     if(privateSendClient.nLiquidityProvider) {
         // special case for liquidity providers only, normal clients should use default value
         privateSendClient.SetMinBlocksToWait(privateSendClient.nLiquidityProvider * 15);
+        nMaxRounds = std::numeric_limits<int>::max();
     }
 
+    //privateSendClient.nPrivateSendRounds = std::min(std::max((int)gArgs.GetArg("-privatesendrounds", DEFAULT_PRIVATESEND_ROUNDS), 2), privateSendClient.nLiquidityProvider ? 99999 : 16);
+    //privateSendClient.nPrivateSendAmount = std::min(std::max((int)gArgs.GetArg("-privatesendamount", DEFAULT_PRIVATESEND_AMOUNT), 2), 999999);
     privateSendClient.fEnablePrivateSend = gArgs.GetBoolArg("-enableprivatesend", false);
     privateSendClient.fPrivateSendMultiSession = gArgs.GetBoolArg("-privatesendmultisession", DEFAULT_PRIVATESEND_MULTISESSION);
-    privateSendClient.nPrivateSendRounds = std::min(std::max((int)gArgs.GetArg("-privatesendrounds", DEFAULT_PRIVATESEND_ROUNDS), 2), privateSendClient.nLiquidityProvider ? 99999 : 16);
-    privateSendClient.nPrivateSendAmount = std::min(std::max((int)gArgs.GetArg("-privatesendamount", DEFAULT_PRIVATESEND_AMOUNT), 2), 999999);
+    //privateSendClient.nPrivateSendSessions = std::min(std::max((int)GetArg("-privatesendsessions", DEFAULT_PRIVATESEND_SESSIONS), MIN_PRIVATESEND_SESSIONS), MAX_PRIVATESEND_SESSIONS);
+    privateSendClient.nPrivateSendRounds = std::min(std::max((int)gArgs.GetArg("-privatesendrounds", DEFAULT_PRIVATESEND_ROUNDS), MIN_PRIVATESEND_ROUNDS), nMaxRounds);
+    privateSendClient.nPrivateSendAmount = std::min(std::max((int)gArgs.GetArg("-privatesendamount", DEFAULT_PRIVATESEND_AMOUNT), MIN_PRIVATESEND_AMOUNT), MAX_PRIVATESEND_AMOUNT);
 #endif // ENABLE_WALLET
-
+ 
     fEnableInstantSend = gArgs.GetBoolArg("-enableinstantsend", 1);
     nInstantSendDepth = gArgs.GetArg("-instantsenddepth", DEFAULT_INSTANTSEND_DEPTH);
     nInstantSendDepth = std::min(std::max(nInstantSendDepth, 0), 60);

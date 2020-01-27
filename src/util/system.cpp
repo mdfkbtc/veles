@@ -646,9 +646,12 @@ std::string ArgsManager::GetHelpMessage() const
                 break;
             // FXTC BEGIN
             // Dash
-            case OptionsCategory::DASH_FEATURES:
-                usage += HelpMessageGroup("Dash features:");
+            case OptionsCategory::MASTERNODE_FEATURES:
+                usage += HelpMessageGroup("Masternode features:");
                 break;
+            case OptionsCategory::PRIVATESEND_FEATURES:
+                usage += HelpMessageGroup("Privatesend features:");
+                break;    
             //
             // FXTC END
             default:

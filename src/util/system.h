@@ -161,9 +161,8 @@ enum class OptionsCategory {
     REGISTER_COMMANDS,
 
     // FXTC BEGIN
-    // Dash
-    DASH_FEATURES,
-    //
+    MASTERNODE_FEATURES,
+    PRIVATESEND_FEATURES,
     // FXTC END
 
     HIDDEN // Always the last option to avoid printing these in the help
