@@ -143,6 +143,8 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "setnetworkactive", 0, "state" },
     // Dash
     { "spork", 1, "value" },
+    { "setprivatesendrounds", 0, "rounds" },
+    { "setprivatesendamount", 0, "amount" },
     //
     { "getmempoolancestors", 1, "verbose" },
     { "getmempooldescendants", 1, "verbose" },
