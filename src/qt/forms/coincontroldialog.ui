@@ -45,7 +45,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Quantity:</string>
+          <string>Quantity:</string> 
          </property>
         </widget>
        </item>
@@ -441,6 +441,11 @@
       </property>
       <property name="toolTip">
        <string>Confirmed</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>PS Rounds</string>
       </property>
      </column>
      <!--

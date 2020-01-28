@@ -80,6 +80,7 @@ private:
         COLUMN_ADDRESS,
         COLUMN_DATE,
         COLUMN_CONFIRMATIONS,
+        COLUMN_PRIVATESEND_ROUNDS,
     };
 
     enum

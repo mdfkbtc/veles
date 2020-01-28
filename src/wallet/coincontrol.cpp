@@ -12,6 +12,7 @@ void CCoinControl::SetNull()
     m_change_type.reset();
     fAllowOtherInputs = false;
     fAllowWatchOnly = false;
+    fUsePrivateSend = true;
     m_avoid_partial_spends = gArgs.GetBoolArg("-avoidpartialspends", DEFAULT_AVOIDPARTIALSPENDS);
     setSelected.clear();
     m_feerate.reset();

@@ -29,6 +29,8 @@ public:
     bool fAllowWatchOnly;
     //! Override automatic min/max checks on fee, m_feerate must be set if true
     bool fOverrideFeeRate;
+    //! Pirvatesend
+    bool fUsePrivateSend;
     //! Override the wallet's m_pay_tx_fee if set
     boost::optional<CFeeRate> m_feerate;
     //! Override the default confirmation target if set
