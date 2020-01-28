@@ -8,45 +8,45 @@ fixes and performance improvements, as well as updated translations.
 Please report bugs using the issue tracker at GitHub:
 
   <https://github.com/velescore/veles/issues>
+Veles Core version 0.18.1.3 is now available from:
+
+ <https://github.com/velescore/veles/releases/tag/v0.18.1.3/>
+
+This is a new minor version release, including performance and other
+improvements.
+
+Please report bugs using the issue tracker at GitHub:
+
+  <https://github.com/velescore/veles/issues>
 
 How to Upgrade
 ==============
 
-If you are running an older version, shut it down. Wait until it has
-completely shut down (which might take a few minutes for older
-versions), then run the installer (on Windows) or just copy over
-`/Applications/Veles-Qt` (on Mac) or `velesd`/`veles-qt` (on
-Linux).
+If you are running an older version, shut it down. Wait until it has completely
+shut down (which might take a few minutes for older versions), then run the
+installer (on Windows) or just copy over `/Applications/Veles-Qt` (on Mac)
+or `Velesd`/`Veles-qt` (on Linux).
+
+Downgrading warning
+-------------------
+
+Wallets created in 0.16 and later are not compatible with versions prior to 0.16
+and will not work if you try to use newly created wallets in older versions. Existing
+wallets that were created with older versions are not affected by this. This might
+be useful only for exporting of old private keys, as wallets of version v0.18.0.20
+and older are not compatible with the current chain anymore.
 
 Compatibility
 ==============
 
-Veles Core is supported and extensively tested on operating systems
-using the Linux kernel, macOS 10.10+, and Windows 7 and newer. It is not
-recommended to use Veles Core on unsupported systems.
+Veles Core is extensively tested on multiple operating systems using
+the Linux kernel, macOS 10.8+, and Windows Vista and later. Windows XP is not supported.
 
 Veles Core should also work on most other Unix-like systems but is not
-as frequently tested on them.
+frequently tested on them.
 
-In addition to previously-supported CPU platforms, this release's
-pre-compiled distribution also provides binaries for the RISC-V
-platform.
-
-If you are using the `systemd` unit configuration file located at
-`contrib/init/velesd.service`, it has been changed to use
-`/var/lib/velesd` as the data directory instead of
-`~veles/.veles`. When switching over to the new configuration file,
-please make sure that the filesystem on which `/var/lib/velesd` will
-exist has enough space (check using `df -h /var/lib/velesd`), and
-optionally copy over your existing data directory. See the [systemd init
-file section](#systemd-init-file) for more details.
-
-Masternodes
-===========
-Lowering Masternode collateral from 2000 VLS to 500 VLS . Old Masternode collateral will be valid until block 240000 (circa 2 months from release), until then it is inevitable update your wallet and remake Masternodes , because old one will be not valid anymore and your wallets will generate ivalid votes.
-
-RPC's 
-=====
+0.18.1.3 change log
+===================
 
 New RPC's: 
 ----------
@@ -62,11 +62,9 @@ Update RPC's:
 
  - `getwalletinfo` - add 'privatesend_balance' into output of command 
 
-PrivateSend
-===========
 
-Activation and Introduction
----------------------------
+Activation and Introduction PrivateSend
+---------------------------------------
 
 PrivateSend is disabled by default ,to activate PrivateSend function open your Veles Core wallet, go to Settings and select Options. It will only start after you set the number of rounds and number of Veles to mix under settings and click Start Mixing on the Overview tab of your wallet.
 
@@ -127,11 +125,13 @@ To send a payment using PrivateSend, go to the Send tab of the Veles Core wallet
 Credits
 =======
 
-Thanks to everyone who contributed to this release:
+Thanks to everyone who directly contributed to this release:
 
-Veles Core contributors
-- Barrystyle
 - AltcoinBaggins
-- Mdfkbtc
+- Barrystyle
+- mdfkbtc
+- UhlikSK
 
-Special thanks to whole Dash Core team .
+Special thanks to whole Dash Core team !
+
+As well as everyone that helped to improve Veles Core with their suggestions at [Veles Discord](https://discord.gg/rXgH6Qn).
