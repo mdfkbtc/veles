@@ -10,6 +10,7 @@
 #include <key_io.h>
 #include <timedata.h>
 #include <validation.h>
+#include <privatesend/privatesend.h>
 
 #include <stdint.h>
 
@@ -77,28 +78,87 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
     }
     else
     {
+        std::vector<std::shared_ptr<CWallet>> wallets = GetWallets();
+        CWallet * const pwallet = (wallets.size() > 0) ? wallets[0].get() : nullptr;
+        bool fAllFromMeDenom = true;
+        int nFromMe = 0;
         bool involvesWatchAddress = false;
         isminetype fAllFromMe = ISMINE_SPENDABLE;
+        for (const CTxIn& txin : wtx.tx->vin)
+        {
+            if(pwallet->IsMine(txin)) {
+                fAllFromMeDenom = fAllFromMeDenom && pwallet->IsDenominated(txin.prevout);
+                nFromMe++;
+            }
+        }
         for (const isminetype mine : wtx.txin_is_mine)
         {
             if(mine & ISMINE_WATCH_ONLY) involvesWatchAddress = true;
             if(fAllFromMe > mine) fAllFromMe = mine;
         }
 
+        bool fAllToMeDenom = true;
+        int nToMe = 0;
         isminetype fAllToMe = ISMINE_SPENDABLE;
+        for (const CTxOut& txout : wtx.tx->vout)
+        {
+            if(pwallet->IsMine(txout)) { 
+                fAllToMeDenom = fAllToMeDenom && CPrivateSend::IsDenominatedAmount(txout.nValue);
+                nToMe++;
+            }
+        }
         for (const isminetype mine : wtx.txout_is_mine)
         {
             if(mine & ISMINE_WATCH_ONLY) involvesWatchAddress = true;
             if(fAllToMe > mine) fAllToMe = mine;
         }
 
-        if (fAllFromMe && fAllToMe)
-        {
+        if(fAllFromMeDenom && fAllToMeDenom && nFromMe && nToMe) {
+            parts.append(TransactionRecord(hash, nTime, TransactionRecord::PrivateSendDenominate, "", -nDebit, nCredit));
+            parts.last().involvesWatchAddress = false;   // maybe pass to TransactionRecord as constructor argument
+        }
+        else if(fAllFromMe && fAllToMe){
+            // TODO: this section still not accurate but covers most cases,
+            // might need some additional work however
+            // PRIVATESEND END
+            TransactionRecord sub(hash, nTime);
+            // Payment to self by default
+            sub.type = TransactionRecord::SendToSelf;
+            sub.address = "";
+
+            if(mapValue["DS"] == "1")
+            {
+                sub.type = TransactionRecord::PrivateSend;
+                CTxDestination address;
+                if (ExtractDestination(wtx.tx->vout[0].scriptPubKey, address))
+                {
+                    // Sent to Dash Address
+                    sub.address = EncodeDestination(address);
+                }
+                else
+                {
+                    // Sent to IP, or other non-address transaction like OP_EVAL
+                    sub.address = mapValue["to"];
+                }
+            }
+            else
+            {
+                for (unsigned int nOut = 0; nOut < wtx.tx->vout.size(); nOut++)
+                {
+                    const CTxOut& txout = wtx.tx->vout[nOut];
+                    sub.idx = parts.size();
+
+                    if(CPrivateSend::IsCollateralAmount(txout.nValue)) sub.type = TransactionRecord::PrivateSendMakeCollaterals;
+                    if(CPrivateSend::IsDenominatedAmount(txout.nValue)) sub.type = TransactionRecord::PrivateSendCreateDenominations;
+                    if(nDebit - wtx.tx->GetValueOut() == CPrivateSend::GetCollateralAmount()) sub.type = TransactionRecord::PrivateSendCollateralPayment;
+                }
+            }
             // Payment to self
             CAmount nChange = wtx.change;
 
-            parts.append(TransactionRecord(hash, nTime, TransactionRecord::SendToSelf, "",
-                            -(nDebit - nChange), nCredit - nChange));
+            sub.debit = -(nDebit - nChange);
+            sub.credit = nCredit - nChange;
+            parts.append(sub);
             parts.last().involvesWatchAddress = involvesWatchAddress;   // maybe pass to TransactionRecord as constructor argument
         }
         else if (fAllFromMe)
@@ -134,7 +194,11 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const interface
                     sub.type = TransactionRecord::SendToOther;
                     sub.address = mapValue["to"];
                 }
-
+                if(mapValue["DS"] == "1")
+                {
+                    sub.type = TransactionRecord::PrivateSend;
+                }
+                
                 CAmount nValue = txout.nValue;
                 /* Add fee to first output */
                 if (nTxFee > 0)
