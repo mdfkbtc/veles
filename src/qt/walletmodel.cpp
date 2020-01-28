@@ -25,6 +25,7 @@
 #include <util/system.h> // for GetBoolArg
 #include <wallet/coincontrol.h>
 #include <wallet/wallet.h>
+#include <privatesend/privatesend-client.h>
 
 #include <stdint.h>
 
@@ -82,12 +83,13 @@ void WalletModel::pollBalanceChanged()
         return;
     }
 
-    if(fForceCheckBalanceChanged || m_node.getNumBlocks() != cachedNumBlocks)
+    if(fForceCheckBalanceChanged || m_node.getNumBlocks() != cachedNumBlocks || privateSendClient.nPrivateSendRounds != cachedPrivateSendRounds)
     {
         fForceCheckBalanceChanged = false;
 
         // Balance and number of transactions might have changed
         cachedNumBlocks = m_node.getNumBlocks();
+        cachedPrivateSendRounds = privateSendClient.nPrivateSendRounds;
 
         checkBalanceChanged(new_balances);
         if(transactionTableModel)
