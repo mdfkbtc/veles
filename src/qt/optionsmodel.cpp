@@ -20,6 +20,7 @@
 #include <netbase.h>
 #include <txdb.h> // for -dbcache defaults
 #include <qt/intro.h>
+#include <privatesend/privatesend-client.h>
 
 // Dash
 #ifdef ENABLE_WALLET
@@ -93,10 +94,30 @@ void OptionsModel::Init(bool resetSettings)
         settings.setValue("fCoinControlFeatures", false);
     fCoinControlFeatures = settings.value("fCoinControlFeatures", false).toBool();
 
+    if (!settings.contains("fShowPrivateSendPopups"))
+    settings.setValue("fShowPrivateSendPopups", true);
+
     // Dash
 #ifdef ENABLE_WALLET
     if (!settings.contains("fShowMasternodesTab"))
     settings.setValue("fShowMasternodesTab", masternodeConfig.getCount());
+
+    if (!settings.contains("nPrivateSendRounds"))
+        settings.setValue("nPrivateSendRounds", DEFAULT_PRIVATESEND_ROUNDS);
+    if (!m_node.softSetArg("-privatesendrounds", settings.value("nPrivateSendRounds").toString().toStdString()))
+        addOverriddenOption("-privatesendrounds");
+    privateSendClient.nPrivateSendRounds = settings.value("nPrivateSendRounds").toInt();
+
+    if (!settings.contains("nPrivateSendAmount")) {
+        // for migration from old settings
+        if (!settings.contains("nAnonymizeDashAmount"))
+            settings.setValue("nPrivateSendAmount", DEFAULT_PRIVATESEND_AMOUNT);
+        else
+            settings.setValue("nPrivateSendAmount", settings.value("nAnonymizeDashAmount").toInt());
+    }
+    if (!m_node.softSetArg("-privatesendamount", settings.value("nPrivateSendAmount").toString().toStdString()))
+        addOverriddenOption("-privatesendamount");
+    privateSendClient.nPrivateSendAmount = settings.value("nPrivateSendAmount").toInt();
 #endif // ENABLE_WALLET
     //
 
@@ -306,7 +327,14 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
         // Dash
         case ShowMasternodesTab:
             return settings.value("fShowMasternodesTab");
-        //
+        case ShowPrivateSendPopups:
+            return settings.value("fShowPrivateSendPopups");
+        case LowKeysWarning:
+            return settings.value("fLowKeysWarning");
+        case PrivateSendRounds:
+            return settings.value("nPrivateSendRounds");
+        case PrivateSendAmount:
+            return settings.value("nPrivateSendAmount");
 #endif
         case DisplayUnit:
             return nDisplayUnit;
@@ -426,14 +454,34 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
                 setRestartRequired(true);
             }
             break;
-        // Dash
         case ShowMasternodesTab:
             if (settings.value("fShowMasternodesTab") != value) {
                 settings.setValue("fShowMasternodesTab", value);
                 setRestartRequired(true);
             }
             break;
-        //
+        case ShowPrivateSendPopups:
+            settings.setValue("fShowPrivateSendPopups", value);
+            break;
+        case LowKeysWarning:
+            settings.setValue("fLowKeysWarning", value);
+            break;
+        case PrivateSendRounds:
+            if (settings.value("nPrivateSendRounds") != value)
+            {
+                privateSendClient.nPrivateSendRounds = value.toInt();
+                settings.setValue("nPrivateSendRounds", privateSendClient.nPrivateSendRounds);
+                Q_EMIT privateSendRoundsChanged();
+            }
+            break;
+        case PrivateSendAmount:
+            if (settings.value("nPrivateSendAmount") != value)
+            {
+                privateSendClient.nPrivateSendAmount = value.toInt();
+                settings.setValue("nPrivateSendAmount", privateSendClient.nPrivateSendAmount);
+                Q_EMIT privateSentAmountChanged();
+            }
+            break;
 #endif
         case DisplayUnit:
             setDisplayUnit(value);

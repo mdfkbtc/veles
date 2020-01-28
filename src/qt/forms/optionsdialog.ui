@@ -216,7 +216,6 @@
             </property>
            </widget>
           </item>
-          <!-- Dash -->
           <item>
            <widget class="QCheckBox" name="showMasternodesTab">
             <property name="toolTip">
@@ -227,7 +226,26 @@
             </property>
            </widget>
           </item>
-          <!--      -->
+          <item>
+           <widget class="QCheckBox" name="showPrivateSendPopups">
+            <property name="toolTip">
+             <string>Show system popups for PrivateSend mixing transactions&lt;br/&gt;just like for all other transaction types.</string>
+            </property>
+            <property name="text">
+             <string>Show popups for PrivateSend transactions</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="lowKeysWarning">
+            <property name="toolTip">
+             <string>Show warning dialog when PrivateSend detects that wallet has very low number of keys left.</string>
+            </property>
+            <property name="text">
+             <string>Warn if PrivateSend is running out of keys</string>
+            </property>
+           </widget>
+          </item>
           <item>
            <widget class="QCheckBox" name="spendZeroConfChange">
             <property name="toolTip">
@@ -240,6 +258,75 @@
           </item>
          </layout>
         </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4_Wallet">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="toolTip">
+            <string>This setting determines the amount of individual masternodes that an input will be anonymized through.&lt;br/&gt;More rounds of anonymization gives a higher degree of privacy, but also costs more in fees.</string>
+           </property>
+           <property name="text">
+            <string>PrivateSend rounds to use</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="privateSendRounds">
+           <property name="minimum">
+            <number>2</number>
+           </property>
+           <property name="maximum">
+            <number>8</number>
+           </property>
+           <property name="value">
+            <number>4</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="toolTip">
+            <string>This amount acts as a threshold to turn off PrivateSend once it's reached.</string>
+           </property>
+           <property name="statusTip">
+            <string notr="true"/>
+           </property>
+           <property name="whatsThis">
+            <string notr="true"/>
+           </property>
+           <property name="accessibleName">
+            <string notr="true"/>
+           </property>
+           <property name="accessibleDescription">
+            <string notr="true"/>
+           </property>
+           <property name="text">
+            <string>Amount of VLS to keep anonymized</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="privateSendAmount_2">
+           <property name="minimum">
+            <number>2</number>
+           </property>
+           <property name="maximum">
+            <number>1000</number>
+           </property>
+           <property name="singleStep">
+            <number>10</number>
+           </property>
+           <property name="value">
+            <number>1000</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <spacer name="verticalSpacer_Wallet">

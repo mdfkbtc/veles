@@ -59,9 +59,11 @@ public:
         PruneSize,              // int
         DatabaseCache,          // int
         SpendZeroConfChange,    // bool
-        // Dash
+        LowKeysWarning,         // bool
         ShowMasternodesTab,     // bool
-        //
+        ShowPrivateSendPopups,  // bool
+        PrivateSendRounds,      // int
+        PrivateSendAmount,      // int
         Listen,                 // bool
         OptionIDRowCount,
     };
@@ -112,6 +114,8 @@ private:
 Q_SIGNALS:
     void displayUnitChanged(int unit);
     void coinControlFeaturesChanged(bool);
+    void privateSendRoundsChanged();
+    void privateSentAmountChanged();
     void hideTrayIconChanged(bool);
 };
 
