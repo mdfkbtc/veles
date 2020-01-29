@@ -538,6 +538,80 @@ QPushButton#labelTransactionsStatus {
 	background-color: transparent;
 	border: none;
 }
+/******************************* Privatesend *********************************/
+
+QWidget .QFrame#framePrivateSend .QLabel#labelPrivateSendLastMessage { /* PrivateSend Status Notifications */
+	qproperty-alignment: 'AlignVCenter | AlignCenter';
+	min-width: 288px;
+	min-height: 43px;
+	font-size:11px;
+	color:#818181;
+}
+
+QWidget .QFrame#framePrivateSend .QPushButton { /* PrivateSend Buttons - General Attributes */
+	color: #EEE;
+	background-color: #313131;
+	border: 1px solid rgba(17, 17, 17, 0.5);
+	border-radius: 0px;
+	padding: 6px 12px;
+	min-width: 80px;
+	min-height: 20px;
+	/* hide icons */
+	qproperty-icon: url(" ");
+}
+
+QWidget .QFrame#framePrivateSend QPushButton:focus {
+	border:none;
+	outline:none;
+}
+
+
+QWidget .QFrame#framePrivateSend .QPushButton#togglePrivateSend { /* Start PrivateSend Mixing */
+	color: #EEE;
+	background-color: #313131;
+	border: 1px solid rgba(17, 17, 17, 0.5);
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+QWidget .QFrame#framePrivateSend .QPushButton#togglePrivateSend:hover {
+	background-color: rgba(85, 85, 85, 0.9);
+	border: 1px solid rgba(17, 17, 17, 0.5);
+}
+
+QWidget .QFrame#framePrivateSend .QPushButton#privateSendAuto { /* Try Mix Button */
+	color: #EEE;
+	background-color: #313131;
+	border: 1px solid rgba(17, 17, 17, 0.5);
+}
+
+QWidget .QFrame#framePrivateSend .QPushButton#privateSendAuto:hover {
+	background-color: rgba(85, 85, 85, 0.9);
+	border: 1px solid rgba(17, 17, 17, 0.5);
+}
+
+
+QWidget .QFrame#framePrivateSend .QPushButton#privateSendInfo { /* Info Button */
+	color: #EEE;
+	background-color: rgba(240, 173, 78, 0.7);
+	border: 1px solid rgba(17, 17, 17, 0.8);
+}
+
+QWidget .QFrame#framePrivateSend .QPushButton#privateSendInfo:hover {
+	background-color: rgba(238, 162, 54, 0.7);
+	border: 1px solid rgba(17, 17, 17, 0.8);
+}
+
+QWidget .QFrame#framePrivateSend .QPushButton#privateSendReset { /* Reset Button */
+	color: #EEE;
+	background-color: rgba(217, 83, 79, 0.7);
+	border: 1px solid rgba(17, 17, 17, 0.8);
+}
+
+QWidget .QFrame#framePrivateSend .QPushButton#privateSendReset:hover {
+	background-color: rgba(201, 67, 63, 0.7);
+	border: 1px solid rgba(17, 17, 17, 0.8);
+}
 
 /******************************* Dialog Boxes *********************************/
 

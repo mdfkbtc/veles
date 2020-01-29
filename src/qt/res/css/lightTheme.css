@@ -169,6 +169,78 @@ QPushButton#labelTransactionsStatus {
 	border: none;
 }
 
+/* Privatesend */
+
+QWidget .QFrame#framePrivateSend .QLabel#labelPrivateSendLastMessage { /* PrivateSend Status Notifications */
+	qproperty-alignment: 'AlignVCenter | AlignCenter';
+	min-width: 288px;
+	min-height: 43px;
+	font-size:11px;
+	color:#818181;
+}
+
+QWidget .QFrame#framePrivateSend .QPushButton { /* PrivateSend Buttons - General Attributes */
+	color: #EEE;
+	background-color: #333;
+	border: 1px solid #aaa;
+	border-radius: 4px;
+	padding: 6px 12px;
+	min-width: 80px;
+	min-height: 20px;
+	/* hide icons */
+	qproperty-icon: url(" ");
+}
+
+QWidget .QFrame#framePrivateSend QPushButton:focus {
+	border:none;
+	outline:none;
+}
+
+
+QWidget .QFrame#framePrivateSend .QPushButton#togglePrivateSend { /* Start PrivateSend Mixing */
+	color: #EEE;
+	background-color: #333;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	border: 1px solid #aaa;
+}
+
+QWidget .QFrame#framePrivateSend .QPushButton#togglePrivateSend:hover {
+	background-color: #444;
+}
+
+QWidget .QFrame#framePrivateSend .QPushButton#privateSendAuto { /* Try Mix Button */
+	color: #EEE;
+	background-color: #333;
+	border: 1px solid #aaa;
+}
+
+QWidget .QFrame#framePrivateSend .QPushButton#privateSendAuto:hover {
+	background-color: #444;
+}
+
+
+QWidget .QFrame#framePrivateSend .QPushButton#privateSendInfo { /* Info Button */
+	color: #EEE;
+	background-color: #f0ad4e;
+	border: 1px solid #eea236;
+}
+
+QWidget .QFrame#framePrivateSend .QPushButton#privateSendInfo:hover {
+	background-color: #eea236;
+	border: 1px solid #de9226;
+}
+
+QWidget .QFrame#framePrivateSend .QPushButton#privateSendReset { /* Reset Button */
+	color: #EEE;
+	background-color: #d9534f;
+	border: 1px solid #c9433f;
+}
+
+QWidget .QFrame#framePrivateSend .QPushButton#privateSendReset:hover {
+	background-color: #c9433f;
+	border: 1px solid #b9332f;
+}
 
 /* Per page stuff */
 
