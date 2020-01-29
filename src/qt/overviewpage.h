@@ -71,6 +71,9 @@ private:
     void DisablePrivateSendCompletely();
 
 private Q_SLOTS:
+    void privateSendAuto();
+    void privateSendReset();
+    void privateSendInfo();
     void togglePrivateSend();
     void updateDisplayUnit();
     void updatePrivateSendProgress();

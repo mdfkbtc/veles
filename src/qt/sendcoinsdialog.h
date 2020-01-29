@@ -62,11 +62,13 @@ private:
     WalletModel *model;
     bool fNewRecipientAllowed;
     bool fFeeMinimized;
+
     const PlatformStyle *platformStyle;
 
     // Process WalletModel::SendCoinsReturn and generate a pair consisting
     // of a message and message flags for use in Q_EMIT message().
     // Additional parameter msgArg can be used via .arg(msgArg).
+    void send(QList<SendCoinsRecipient> recipients, QString strFee, QString strFunds);
     void processSendCoinsReturn(const WalletModel::SendCoinsReturn &sendCoinsReturn, const QString &msgArg = QString());
     void minimizeFeeSection(bool fMinimize);
     void updateFeeMinimizedLabel();

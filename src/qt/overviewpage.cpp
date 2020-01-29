@@ -210,6 +210,7 @@ void OverviewPage::setBalance(const interfaces::WalletBalances& balances)
         ui->labelBalance->setText(BitcoinUnits::formatWithUnit(unit, balances.balance, false, BitcoinUnits::separatorAlways));
         ui->labelUnconfirmed->setText(BitcoinUnits::formatWithUnit(unit, balances.unconfirmed_balance, false, BitcoinUnits::separatorAlways));
         ui->labelImmature->setText(BitcoinUnits::formatWithUnit(unit, balances.immature_balance, false, BitcoinUnits::separatorAlways));
+        ui->labelAnonymized->setText(BitcoinUnits::formatWithUnit(unit, balances.anonymized_balance, false, BitcoinUnits::separatorAlways));
         ui->labelTotalText->setText(BitcoinUnits::formatWithUnit(unit, balances.balance + balances.unconfirmed_balance + balances.immature_balance, false, BitcoinUnits::separatorAlways));
         ui->labelWatchAvailable->setText(BitcoinUnits::formatWithUnit(unit, balances.watch_only_balance, false, BitcoinUnits::separatorAlways));
         ui->labelWatchPending->setText(BitcoinUnits::formatWithUnit(unit, balances.unconfirmed_watch_only_balance, false, BitcoinUnits::separatorAlways));
@@ -589,6 +590,23 @@ void OverviewPage::privateSendStatus()
     ui->labelPrivateSendLastMessage->setText(s);
 
     ui->labelSubmittedDenom->setText(QString(privateSendClient.nSessionDenom));
+}
+
+void OverviewPage::privateSendAuto(){
+    privateSendClient.DoAutomaticDenominating(*g_connman);
+}
+
+void OverviewPage::privateSendReset(){
+    privateSendClient.ResetPool();
+
+    QMessageBox::warning(this, tr("PrivateSend"),
+        tr("PrivateSend was successfully reset."),
+        QMessageBox::Ok, QMessageBox::Ok);
+}
+
+void OverviewPage::privateSendInfo(){
+    //HelpMessageDialog dlg(this, HelpMessageDialog::pshelp);
+    //dlg.exec();
 }
 
 void OverviewPage::togglePrivateSend()
