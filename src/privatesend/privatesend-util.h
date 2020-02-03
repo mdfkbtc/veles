@@ -37,4 +37,4 @@ public:
     void ReturnAll();
 
 };
-#endif // DASH_PRIVATESEND_PRIVATESENDUTIL_H
+#endif //DASH_PRIVATESEND_PRIVATESENDUTIL_H

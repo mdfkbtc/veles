@@ -156,4 +156,4 @@ public:
 
 void ThreadCheckPrivateSendClient(CConnman& connman);
 
-#endif // DASH_PRIVATESEND_PRIVATESENDCLIENT_H
+#endif //DASH_PRIVATESEND_PRIVATESENDCLIENT_H

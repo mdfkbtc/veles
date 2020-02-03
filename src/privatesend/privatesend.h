@@ -360,4 +360,4 @@ public:
 
 void ThreadCheckPrivateSend(CConnman& connman);
 
-#endif // DASH_PRIVATESEND_PRIVATESEND_H
+#endif //DASH_PRIVATESEND_PRIVATESEND_H

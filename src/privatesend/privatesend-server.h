@@ -79,4 +79,4 @@ public:
 
 void ThreadCheckPrivateSendServer(CConnman& connman);
 
-#endif // DASH_PRIVATESEND_PRIVATESENDSERVER_H
+#endif //DASH_PRIVATESEND_PRIVATESENDSERVER_H
