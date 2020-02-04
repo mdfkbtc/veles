@@ -4,13 +4,13 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DASH_PRIVATESEND_PRIVATESENDCLIENT_H
-#define DASH_PRIVATESEND_PRIVATESENDCLIENT_H
+#ifndef DASH_PRIVATESEND_CLIENT_H
+#define DASH_PRIVATESEND_CLIENT_H
 
 #include <masternode.h>
 #include <privatesend/privatesend.h>
 #include <wallet/wallet.h>
-#include <privatesend/privatesend-util.h>
+#include <privatesend/util.h>
 #include <interfaces/chain.h>
 #include <interfaces/node.h>
 
@@ -156,4 +156,4 @@ public:
 
 void ThreadCheckPrivateSendClient(CConnman& connman);
 
-#endif //DASH_PRIVATESEND_PRIVATESENDCLIENT_H
+#endif //DASH_PRIVATESEND_CLIENT_H

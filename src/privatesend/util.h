@@ -4,8 +4,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DASH_PRIVATESEND_PRIVATESENDUTIL_H
-#define DASH_PRIVATESEND_PRIVATESENDUTIL_H
+#ifndef DASH_PRIVATESEND_UTIL_H
+#define DASH_PRIVATESEND_UTIL_H
 
 #include <wallet/wallet.h>
 
@@ -37,4 +37,4 @@ public:
     void ReturnAll();
 
 };
-#endif //DASH_PRIVATESEND_PRIVATESENDUTIL_H
+#endif //DASH_PRIVATESEND_UTIL_H

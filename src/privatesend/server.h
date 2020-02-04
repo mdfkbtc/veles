@@ -4,8 +4,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DASH_PRIVATESEND_PRIVATESENDSERVER_H
-#define DASH_PRIVATESEND_PRIVATESENDSERVER_H
+#ifndef DASH_PRIVATESEND_SERVER_H
+#define DASH_PRIVATESEND_SERVER_H
 
 #include <net.h>
 #include <privatesend/privatesend.h>
@@ -79,4 +79,4 @@ public:
 
 void ThreadCheckPrivateSendServer(CConnman& connman);
 
-#endif //DASH_PRIVATESEND_PRIVATESENDSERVER_H
+#endif //DASH_PRIVATESEND_SERVER_H
