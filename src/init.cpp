@@ -628,7 +628,7 @@ std::string LicenseInfo()
 
     // FXTC BEGIN
     //return CopyrightHolders(strprintf(_("Copyright (C) %i-%i").translated, 2009, COPYRIGHT_YEAR) + " ") + "\n" +
-    return CopyrightHolders(strprintf(_("Copyright (C) "))) + "\n" +
+    return CopyrightHolders(strprintf(_("Copyright (C) "))) + ("\n" +
     // FXTC END
            "\n" +
            strprintf(_("Please contribute if you find %s useful. "
@@ -643,7 +643,7 @@ std::string LicenseInfo()
            strprintf(_("Distributed under the MIT software license, see the accompanying file %s or %s").translated, "COPYING", "<https://opensource.org/licenses/MIT>") + "\n" +
            "\n" +
            strprintf(_("This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit %s and cryptographic software written by Eric Young and UPnP software written by Thomas Bernard.").translated, "<https://www.openssl.org>") +
-           "\n";
+           "\n").translated;
 }
 
 #if HAVE_SYSTEM
@@ -1362,7 +1362,7 @@ bool AppInitMain(InitInterfaces& interfaces)
     if (gArgs.IsArgSet("-sporkkey")) // spork priv key
     {
         if (!sporkManager.SetPrivKey(gArgs.GetArg("-sporkkey", "")))
-            return InitError(_("Unable to sign spork message, wrong key?"));
+            return InitError(_("Unable to sign spork message, wrong key?").translated);
     }
     //
 
@@ -1599,9 +1599,9 @@ bool AppInitMain(InitInterfaces& interfaces)
                 }
 
                 // FXTC BEGIN
-                uiInterface.InitMessage(_("Loading sporks..."));
+                uiInterface.InitMessage(_("Loading sporks...").translated);
                 sporkManager.LoadSporksFromDB();
-                uiInterface.InitMessage(_("Loading block index..."));
+                uiInterface.InitMessage(_("Loading block index...").translated);
                 // FXTC END
 
                 if (ShutdownRequested()) break;
@@ -1867,11 +1867,12 @@ bool AppInitMain(InitInterfaces& interfaces)
         std::string strMasterNodePrivKey = gArgs.GetArg("-masternodeprivkey", "");
         if(!strMasterNodePrivKey.empty()) {
             if(!CMessageSigner::GetKeysFromSecret(strMasterNodePrivKey, activeMasternode.keyMasternode, activeMasternode.pubKeyMasternode))
-                return InitError(_("Invalid masternodeprivkey. Please see documenation."));
+                return InitError(_("Invalid masternodeprivkey. Please see documenation.").translated);
 
-            LogPrintf("  pubKeyMasternode: %s\n", EncodeDestination(activeMasternode.pubKeyMasternode.GetID()));
+            // FXTC TODO: Replace Encodedestination 
+            //LogPrintf("  pubKeyMasternode: %s\n", EncodeDestination(activeMasternode.pubKeyMasternode.GetID()));
         } else {
-            return InitError(_("You must specify a masternodeprivkey in the configuration. Please see documentation for help."));
+            return InitError(_("You must specify a masternodeprivkey in the configuration. Please see documentation for help.").translated);
         }
     }
 
@@ -1939,7 +1940,7 @@ bool AppInitMain(InitInterfaces& interfaces)
     std::string strDBName;
 
     strDBName = "mncache.dat";
-    uiInterface.InitMessage(_("Loading masternode cache..."));
+    uiInterface.InitMessage(_("Loading masternode cache...").translated);
     CFlatDB<CMasternodeMan> flatdb1(strDBName, "magicMasternodeCache");
     if(!flatdb1.Load(mnodeman)) {
         return InitError(_("Failed to load masternode cache from") + "\n" + (pathDB / strDBName).string());
@@ -1947,28 +1948,28 @@ bool AppInitMain(InitInterfaces& interfaces)
 
     if(mnodeman.size()) {
         strDBName = "mnpayments.dat";
-        uiInterface.InitMessage(_("Loading masternode payment cache..."));
+        uiInterface.InitMessage(_("Loading masternode payment cache...").translated);
         CFlatDB<CMasternodePayments> flatdb2(strDBName, "magicMasternodePaymentsCache");
         if(!flatdb2.Load(mnpayments)) {
             return InitError(_("Failed to load masternode payments cache from") + "\n" + (pathDB / strDBName).string());
         }
 
         strDBName = "governance.dat";
-        uiInterface.InitMessage(_("Loading governance cache..."));
+        uiInterface.InitMessage(_("Loading governance cache...").translated);
         CFlatDB<CGovernanceManager> flatdb3(strDBName, "magicGovernanceCache");
         if(!flatdb3.Load(governance)) {
-            return InitError(_("Failed to load governance cache from") + "\n" + (pathDB / strDBName).string());
+            return InitError(_("Failed to load governance cache from\n") + (pathDB / strDBName).string());
         }
         governance.InitOnLoad();
     } else {
-        uiInterface.InitMessage(_("Masternode cache is empty, skipping payments and governance cache..."));
+        uiInterface.InitMessage(_("Masternode cache is empty, skipping payments and governance cache...").translated);
     }
 
     strDBName = "netfulfilled.dat";
-    uiInterface.InitMessage(_("Loading fulfilled requests cache..."));
+    uiInterface.InitMessage(_("Loading fulfilled requests cache...").translated);
     CFlatDB<CNetFulfilledRequestManager> flatdb4(strDBName, "magicFulfilledCache");
     if(!flatdb4.Load(netfulfilledman)) {
-        return InitError(_("Failed to load fulfilled requests cache from") + "\n" + (pathDB / strDBName).string());
+        return InitError(_("Failed to load fulfilled requests cache from\n") + (pathDB / strDBName).string());
     }
 
     // ********************************************************* Step 11c: update block tip in Dash modules

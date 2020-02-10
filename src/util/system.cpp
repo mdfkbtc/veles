@@ -789,7 +789,7 @@ const fs::path &GetBackupsDir()
         LogPrintf("%s: Warning: incorrect parameter -walletbackupsdir, path must exist! Using default path.\n", __func__);
         // FXTC TODO: check
         //strMiscWarning = _("Warning: incorrect parameter -walletbackupsdir, path must exist! Using default path.");
-        std::string strMessage = strprintf(_("Warning: incorrect parameter -walletbackupsdir, path must exist! Using default path."));
+        //std::string strMessage = strprintf("Warning: incorrect parameter -walletbackupsdir, path must exist! Using default path.");
         // FXTC TODO: SetMiscWarning(strMessage);
     }
     // Default path
@@ -1292,7 +1292,7 @@ std::string CopyrightHolders(const std::string& strPrefix)
     strCopyrightHolders += "\n" + strPrefix + strprintf(" %u-%u ", 2017, 2018) + "The Zcoin developers";
     strCopyrightHolders += "\n" + strPrefix + strprintf(" %u-%u ", 2017, 2018) + "The PIVX developers";
     strCopyrightHolders += "\n" + strPrefix + strprintf(" %u-%u ", 2018, 2019) + "The Veles Core developers";
-    strCopyrightHolders += "\n" + strPrefix + strprintf(" %u-%u ", 2018, COPYRIGHT_YEAR) + strprintf(_(COPYRIGHT_HOLDERS), _(COPYRIGHT_HOLDERS_SUBSTITUTION));
+    //strCopyrightHolders += "\n" + strPrefix + strprintf(" %u-%u ", 2018, COPYRIGHT_YEAR) + strprintf(_(COPYRIGHT_HOLDERS), _(COPYRIGHT_HOLDERS_SUBSTITUTION));
     // FXTC END
 
 

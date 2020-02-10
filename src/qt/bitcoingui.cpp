@@ -360,7 +360,7 @@ void BitcoinGUI::createActions()
     //-//openRepairAction->setStatusTip(tr("Show wallet repair options"));
     //-//openConfEditorAction = new QAction(QIcon(":/icons/" + theme + "/edit"), tr("Open Wallet &Configuration File"), this);
     //-//openConfEditorAction->setStatusTip(tr("Open configuration file"));
-    openMNConfEditorAction = new QAction(platformStyle->TextColorIcon(":/icons/edit"), tr("Open &Masternode Configuration File"), this);
+    openMNConfEditorAction = new QAction(tr("Open &Masternode Configuration File"), this);
     openMNConfEditorAction->setStatusTip(tr("Open Masternode configuration file"));
     //-//showBackupsAction = new QAction(QIcon(":/icons/" + theme + "/browse"), tr("Show Automatic &Backups"), this);
     //-//showBackupsAction->setStatusTip(tr("Show automatically created wallet backups"));

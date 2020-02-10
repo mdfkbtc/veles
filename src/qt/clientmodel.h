@@ -60,6 +60,7 @@ public:
     int getNumConnections(unsigned int flags = CONNECTIONS_ALL) const;
     // Dash
     QString getMasternodeCountString() const;
+    void additionalDataSyncProgressChanged(double nSyncProgress);
     //
     int getHeaderTipHeight() const;
     int64_t getHeaderTipTime() const;

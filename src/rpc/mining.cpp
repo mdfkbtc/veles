@@ -155,7 +155,7 @@ static UniValue generateBlocks(const CScript& coinbase_script, int nGenerate, ui
         }
         // FXTC BEGIN
         //while (nMaxTries > 0 && pblock->nNonce < std::numeric_limits<uint32_t>::max() && !CheckProofOfWork(pblock->GetHash(), pblock->nBits, Params().GetConsensus()) && !ShutdownRequested()) {
-        while (nMaxTries > 0 && pblock->nNonce < std::numeric_limits<uint32_t>::max() && !CheckProofOfWork(pblock->GetPoWHash(), pblock->nBits, Params().GetConsensus()) && !ShutdownRequested() {
+        while (nMaxTries > 0 && pblock->nNonce < std::numeric_limits<uint32_t>::max() && !CheckProofOfWork(pblock->GetPoWHash(), pblock->nBits, Params().GetConsensus()) && !ShutdownRequested()) {
         // FXTC END
             ++pblock->nNonce;
             --nMaxTries;
@@ -500,13 +500,13 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
     CScript payee;
     if (sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)
         && !masternodeSync.IsWinnersListSynced()
-        && !mnpayments.GetBlockPayee(chainActive.Height() + 1, payee))
+        && !mnpayments.GetBlockPayee(ChainActive.Height() + 1, payee))
             throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "FxTC Core is downloading masternode winners...");
 
     // next bock is a superblock and we need governance info to correctly construct it
     if (sporkManager.IsSporkActive(SPORK_9_SUPERBLOCKS_ENABLED)
         && !masternodeSync.IsSynced()
-        && CSuperblock::IsValidBlockHeight(chainActive.Height() + 1))
+        && CSuperblock::IsValidBlockHeight(ChainActive.Height() + 1))
             throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "FxTC Core is syncing with network...");
     //
 

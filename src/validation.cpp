@@ -449,7 +449,7 @@ static bool CheckInputsFromMempoolAndCache(const CTransaction& tx, CValidationSt
 bool GetUTXOCoin(const COutPoint& outpoint, Coin& coin)
 {
     LOCK(cs_main);
-    if (!pcoinsTip->GetCoin(outpoint, coin))
+    if (!CoinsTip()->GetCoin(outpoint, coin))
         return false;
     if (coin.IsSpent())
         return false;
@@ -468,7 +468,7 @@ int GetUTXOConfirmations(const COutPoint& outpoint)
     // -1 means UTXO is yet unknown or already spent
     LOCK(cs_main);
     int nPrevoutHeight = GetUTXOHeight(outpoint);
-    return (nPrevoutHeight > -1 && chainActive.Tip()) ? chainActive.Height() - nPrevoutHeight + 1 : -1;
+    return (nPrevoutHeight > -1 && ChainActive.Tip()) ? ChainActive.Height() - nPrevoutHeight + 1 : -1;
 }
 //
 
@@ -1383,7 +1383,7 @@ void CChainState::InitCoinsCache()
 bool CChainState::IsInitialBlockDownload() const
 
 // FXTC BEGIN
-CAmount GetMasternodePayment(int nHeight, CAmount blockValue)
+void CAmount GetMasternodePayment(int nHeight, CAmount blockValue)
 {
     CAmount ret = blockValue * 0.00;
 
@@ -1397,7 +1397,7 @@ CAmount GetMasternodePayment(int nHeight, CAmount blockValue)
     return ret;
 }
 
-CAmount GetFounderReward(int nHeight, CAmount blockValue)
+void CAmount GetFounderReward(int nHeight, CAmount blockValue)
 {
         CAmount ret = 0;
 
@@ -1408,7 +1408,7 @@ CAmount GetFounderReward(int nHeight, CAmount blockValue)
         return ret;
 }
 // FXTC END
-
+/*
 bool IsInitialBlockDownload()
 {
     // Optimization: pre-test latch before taking the lock.
@@ -1430,7 +1430,7 @@ bool IsInitialBlockDownload()
     m_cached_finished_ibd.store(true, std::memory_order_relaxed);
     return false;
 }
-
+*/
 static CBlockIndex *pindexBestForkTip = nullptr, *pindexBestForkBase = nullptr;
 
 BlockMap& BlockIndex()
@@ -1935,10 +1935,10 @@ int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Para
 bool GetBlockHash(uint256& hashRet, int nBlockHeight)
 {
     LOCK(cs_main);
-    if(chainActive.Tip() == NULL) return false;
-    if(nBlockHeight < -1 || nBlockHeight > chainActive.Height()) return false;
-    if(nBlockHeight == -1) nBlockHeight = chainActive.Height();
-    hashRet = chainActive[nBlockHeight]->GetBlockHash();
+    if(ChainActive.Tip() == NULL) return false;
+    if(nBlockHeight < -1 || nBlockHeight > ChainActive.Height()) return false;
+    if(nBlockHeight == -1) nBlockHeight = ChainActive.Height();
+    hashRet = ChainActive[nBlockHeight]->GetBlockHash();
     return true;
 }
 
@@ -2339,10 +2339,10 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
                 }
             }
             if (!FounderPaid) {
-                return state.DoS(0, error("ConnectBlock(INFINEX): no founder reward"), REJECT_INVALID, "no-founder-reward");
+                return state.Invalid(0, error("ConnectBlock(INFINEX): no founder reward"), REJECT_INVALID, "no-founder-reward");
             }
         } else {
-            return state.DoS(0, error("ConnectBlock(INFINEX): invalid founder reward destination"), REJECT_INVALID, "invalid-founder-reward-destination");
+            return state.Invalid(0, error("ConnectBlock(INFINEX): invalid founder reward destination"), REJECT_INVALID, "invalid-founder-reward-destination");
         }
     }
 

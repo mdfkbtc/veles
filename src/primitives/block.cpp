@@ -11,6 +11,7 @@
 #include <crypto/common.h>
 
 // FXTC BEGIN
+#include <util/strencodings.h>
 #include <crypto/Lyra2Z.h>
 #include <crypto/nist5.h>
 #include <crypto/scrypt.h>

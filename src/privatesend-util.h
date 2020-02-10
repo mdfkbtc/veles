@@ -11,7 +11,7 @@
 class CKeyHolder
 {
 private:
-    CReserveKey reserveKey;
+    //CReserveKey reserveKey;
     CPubKey pubKey;
 public:
     CKeyHolder(CWallet* pwalletIn);
