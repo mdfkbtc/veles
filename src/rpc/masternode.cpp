@@ -14,9 +14,9 @@
 #include <masternodeconfig.h>
 #include <masternodeman.h>
 #ifdef ENABLE_WALLET
-#include <privatesend/privatesend-client.h>
+#include <privatesend/client.h>
 #endif // ENABLE_WALLET
-#include <privatesend/privatesend-server.h>
+#include <privatesend/server.h>
 #include <rpc/server.h>
 // FXTC BEGIN
 #include <rpc/util.h>

@@ -15,9 +15,9 @@
 #include <qt/transactiontablemodel.h>
 #include <qt/walletmodel.h>
 
-#include "masternode-sync.h"
+#include <masternode-sync.h>
 #include <interfaces/wallet.h>
-#include "privatesend/privatesend-client.h"
+#include <privatesend/client.h>
 #include <shutdown.h>
 
 #include <QAbstractItemDelegate>

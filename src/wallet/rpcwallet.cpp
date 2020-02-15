@@ -25,7 +25,7 @@
 #include <policy/fees.h>
 #include <policy/policy.h>
 #include <policy/rbf.h>
-#include <privatesend/privatesend-client.h>
+#include <privatesend/client.h>
 #include <rpc/mining.h>
 #include <rpc/rawtransaction.h>
 #include <rpc/server.h>
@@ -2520,25 +2520,33 @@ UniValue setprivatesendrounds(const JSONRPCRequest& request)
 {
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
     CWallet* const pwallet = wallet.get();
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+    
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
         return NullUniValue;
+    }
 
-    if (request.fHelp || request.params.size() != 1)
+    if (request.fHelp || request.params.size() != 1) {
         throw std::runtime_error(
-            "setprivatesendrounds rounds\n"
-            "\nSet the number of rounds for PrivateSend mixing.\n"
-            "\nArguments:\n"
-            "1. rounds         (numeric, required) The default number of rounds is " + std::to_string(DEFAULT_PRIVATESEND_ROUNDS) + 
-            " Cannot be more than " + std::to_string(MAX_PRIVATESEND_ROUNDS) + " nor less than " + std::to_string(MIN_PRIVATESEND_ROUNDS) +
-            "\nExamples:\n"
-            + HelpExampleCli("setprivatesendrounds", "4")
+            RPCHelpMan{"setprivatesendrounds",
+                "\nSet the number of rounds for PrivateSend mixing.\n",
+                {
+                    {"rounds", RPCArg::Type::AMOUNT, RPCArg::Optional::NO, "The default number of rounds is 2. Cannot be more than 6 nor less than 2."},
+                },
+                RPCResult{
+            "true|false        (boolean) Returns true if successful\n"
+                },
+                RPCExamples{
+                    HelpExampleCli("setprivatesendrounds", "4")
             + HelpExampleRpc("setprivatesendrounds", "16")
-        );
+                },
+            }.ToString());
+    }
 
     int nRounds = request.params[0].get_int();
 
-    if (nRounds > MAX_PRIVATESEND_ROUNDS || nRounds < MIN_PRIVATESEND_ROUNDS)
+    if (nRounds > MAX_PRIVATESEND_ROUNDS || nRounds < MIN_PRIVATESEND_ROUNDS) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid number of rounds");
+    }
 
     privateSendClient.nPrivateSendRounds = nRounds;
 
@@ -2549,25 +2557,33 @@ UniValue setprivatesendamount(const JSONRPCRequest& request)
 {
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
     CWallet* const pwallet = wallet.get();
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp))
+    
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
         return NullUniValue;
+    }
 
-    if (request.fHelp || request.params.size() != 1)
+    if (request.fHelp || request.params.size() != 1) {
         throw std::runtime_error(
-            "setprivatesendamount amount\n"
-            "\nSet the goal amount in " + CURRENCY_UNIT + " for PrivateSend mixing.\n"
-            "\nArguments:\n"
-            "1. amount         (numeric, required) The default amount is " + std::to_string(DEFAULT_PRIVATESEND_AMOUNT) +
-            " Cannot be more than " + std::to_string(MAX_PRIVATESEND_AMOUNT) + " nor less than " + std::to_string(MIN_PRIVATESEND_AMOUNT) +
-            "\nExamples:\n"
-            + HelpExampleCli("setprivatesendamount", "500")
+            RPCHelpMan{"setprivatesendamount",
+                "\nSet the goal amount in " + CURRENCY_UNIT + " for PrivateSend mixing." + "\n",
+                {
+                    {"amount", RPCArg::Type::AMOUNT, RPCArg::Optional::NO, "The default value is 500 VLS. Cannot be more than 1000 VLS nor less than 2 VLS"},
+                },
+                RPCResult{
+            "true|false        (boolean) Returns true if successful\n"
+                },            
+                RPCExamples{
+                    HelpExampleCli("setprivatesendamount", "500")
             + HelpExampleRpc("setprivatesendamount", "208")
-        );
+                },
+            }.ToString());
+    }
 
     int nAmount = request.params[0].get_int();
 
-    if (nAmount > MAX_PRIVATESEND_AMOUNT || nAmount < MIN_PRIVATESEND_AMOUNT)
+    if (nAmount > MAX_PRIVATESEND_AMOUNT || nAmount < MIN_PRIVATESEND_AMOUNT) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid amount of " + CURRENCY_UNIT + " as mixing goal amount");
+    }
 
     privateSendClient.nPrivateSendAmount = nAmount;
 

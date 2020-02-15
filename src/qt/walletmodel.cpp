@@ -25,7 +25,7 @@
 #include <util/system.h> // for GetBoolArg
 #include <wallet/coincontrol.h>
 #include <wallet/wallet.h>
-#include <privatesend/privatesend-client.h>
+#include <privatesend/client.h>
 
 #include <stdint.h>
 

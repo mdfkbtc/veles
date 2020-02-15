@@ -37,8 +37,8 @@
 #include <policy/feerate.h>
 #include <policy/fees.h>
 #include <policy/policy.h>
-#include <privatesend/privatesend-client.h>
-#include <privatesend/privatesend-server.h>
+#include <privatesend/client.h>
+#include <privatesend/server.h>
 #include <rpc/server.h>
 #include <rpc/register.h>
 #include <rpc/blockchain.h>

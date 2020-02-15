@@ -171,9 +171,9 @@ BITCOIN_CORE_H = \
   protocol.h \
   psbt.h \
   privatesend/privatesend.h \
-  privatesend/privatesend-client.h \
-  privatesend/privatesend-server.h \
-  privatesend/privatesend-util.h \
+  privatesend/client.h \
+  privatesend/server.h \
+  privatesend/util.h \
   random.h \
   reverse_iterator.h \
   reverselock.h \
@@ -306,7 +306,7 @@ libbitcoin_server_a_SOURCES = \
   policy/rbf.cpp \
   pow.cpp \
   privatesend/privatesend.cpp \
-  privatesend/privatesend-server.cpp \
+  privatesend/server.cpp \
   rest.cpp \
   rpc/blockchain.cpp \
   rpc/mining.cpp \
@@ -372,8 +372,8 @@ libbitcoin_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 libbitcoin_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_wallet_a_SOURCES = \
   interfaces/wallet.cpp \
-  privatesend/privatesend-client.cpp \
-  privatesend/privatesend-util.cpp \
+  privatesend/client.cpp \
+  privatesend/util.cpp \
   wallet/coincontrol.cpp \
   wallet/crypter.cpp \
   wallet/db.cpp \

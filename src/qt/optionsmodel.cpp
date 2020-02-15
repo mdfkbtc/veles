@@ -20,7 +20,7 @@
 #include <netbase.h>
 #include <txdb.h> // for -dbcache defaults
 #include <qt/intro.h>
-#include <privatesend/privatesend-client.h>
+#include <privatesend/client.h>
 
 // Dash
 #ifdef ENABLE_WALLET

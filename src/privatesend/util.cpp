@@ -3,7 +3,7 @@
 // Copyright (c) 2018-2020 Veles developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#include <privatesend/privatesend-util.h>
+#include <privatesend/util.h>
 
 CKeyHolder::CKeyHolder(CWallet* pwallet) :
     reserveKey(pwallet)
