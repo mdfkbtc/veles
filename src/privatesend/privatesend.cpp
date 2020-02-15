@@ -1,4 +1,6 @@
 // Copyright (c) 2014-2017 The Dash Core developers
+// Copyright (c) 2018-2019 FXTC developers
+// Copyright (c) 2018-2020 Veles developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -216,6 +218,7 @@ bool CPrivateSend::IsCollateralValid(const CTransaction& txCollateral)
     {
         LOCK(cs_main);
         CValidationState validationState;
+        // FXTC TODO: if(!AcceptToMemoryPool(mempool, validationState, txCollateral, false, NULL, false, true, true)) {
         if(!AcceptToMemoryPool(mempool, validationState, MakeTransactionRef(txCollateral), nullptr, NULL, false, maxTxFee)) {
             LogPrint(BCLog::PRIVATESEND, "CPrivateSend::IsCollateralValid -- didn't pass AcceptToMemoryPool()\n");
             return false;
@@ -465,7 +468,15 @@ void ThreadCheckPrivateSend(CConnman& connman)
 
             // make sure to check all masternodes first
             mnodeman.Check();
-
+/*
+            // VELES BEGIN
+#if defined(ENABLE_WALLET) && defined(ENABLE_MN_HELPER)
+            // check whether remote masternodes in PRE_ENABLED state need to be re-activated, fixes veles#20
+            if(nTick % (MASTERNODE_MIN_MNP_SECONDS / 4) == 30)
+                mnodeman.CheckRemoteActivation(connman);
+#endif // defined(ENABLE_WALLET) && defined(ENABLE_MN_HELPER)
+            // VELES END
+*/
             // check if we should activate or ping every few minutes,
             // slightly postpone first run to give net thread a chance to connect to some peers
             if(nTick % MASTERNODE_MIN_MNP_SECONDS == 15)
