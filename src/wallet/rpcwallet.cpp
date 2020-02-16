@@ -2525,7 +2525,7 @@ UniValue setprivatesendrounds(const JSONRPCRequest& request)
         return NullUniValue;
     }
 
-    if (request.fHelp || request.params.size() < 1 || request.params.size() > 1) {
+    if (request.fHelp || request.params.size() != 1) {
         throw std::runtime_error(
             RPCHelpMan{"setprivatesendrounds",
                 "\nSet the number of rounds for PrivateSend mixing.\n",
@@ -2562,7 +2562,7 @@ UniValue setprivatesendamount(const JSONRPCRequest& request)
         return NullUniValue;
     }
 
-    if (request.fHelp || request.params.size() != 1) {
+    if (request.fHelp || request.params.size() < 1 || request.params.size() > 1) {
         throw std::runtime_error(
             RPCHelpMan{"setprivatesendamount",
                 "\nSet the goal amount in " + CURRENCY_UNIT + " for PrivateSend mixing." + "\n",
