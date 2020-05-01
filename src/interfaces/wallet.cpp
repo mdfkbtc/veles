@@ -383,6 +383,7 @@ public:
         result.unconfirmed_balance = m_wallet->GetUnconfirmedBalance();
         result.immature_balance = m_wallet->GetImmatureBalance();
         result.have_watch_only = m_wallet->HaveWatchOnly();
+        result.anonymized_balance = m_wallet->GetAnonymizedBalance();
         if (result.have_watch_only) {
             result.watch_only_balance = m_wallet->GetBalance(ISMINE_WATCH_ONLY);
             result.unconfirmed_watch_only_balance = m_wallet->GetUnconfirmedWatchOnlyBalance();

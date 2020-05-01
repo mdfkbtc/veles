@@ -124,6 +124,12 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     ui(new Ui::OverviewPage),
     clientModel(nullptr),
     walletModel(nullptr),
+    //currentBalance(-1),
+    currentUnconfirmedBalance(-1),
+    currentImmatureBalance(-1),
+    currentWatchOnlyBalance(-1),
+    currentWatchUnconfBalance(-1),
+    currentWatchImmatureBalance(-1),
     cachedNumISLocks(-1),
     txdelegate(new TxViewDelegate(platformStyle, this))
 {
@@ -156,7 +162,8 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     showOutOfSyncWarning(true);
 
     // that's it for litemode
-    if(fLiteMode) return;
+    //if(fLiteMode) return;
+    if(!privateSendClient.fEnablePrivateSend) return;
 
     // Disable any PS UI for masternode or when autobackup is disabled or failed for whatever reason
     if(fMasterNode || nWalletBackups <= 0){
@@ -199,6 +206,7 @@ OverviewPage::~OverviewPage()
 
 void OverviewPage::setBalance(const interfaces::WalletBalances& balances)
 {
+/*
     int unit = walletModel->getOptionsModel()->getDisplayUnit();
     m_balances = balances;
     if (walletModel->privateKeysDisabled()) {
@@ -217,6 +225,21 @@ void OverviewPage::setBalance(const interfaces::WalletBalances& balances)
         ui->labelWatchImmature->setText(BitcoinUnits::formatWithUnit(unit, balances.immature_watch_only_balance, false, BitcoinUnits::separatorAlways));
         ui->labelWatchTotal->setText(BitcoinUnits::formatWithUnit(unit, balances.watch_only_balance + balances.unconfirmed_watch_only_balance + balances.immature_watch_only_balance, false, BitcoinUnits::separatorAlways));
     }
+*/
+    //currentBalance = balances.balance;
+    currentUnconfirmedBalance = balances.unconfirmed_balance;
+    currentImmatureBalance = balances.immature_balance;
+    currentAnonymizedBalance = balances.anonymized_balance;
+    currentWatchOnlyBalance = balances.watch_only_balance;
+    currentWatchImmatureBalance = balances.immature_balance;
+    ui->labelBalance->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, balances.balance, false, BitcoinUnits::separatorAlways));
+    ui->labelUnconfirmed->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, currentUnconfirmedBalance, false, BitcoinUnits::separatorAlways));
+    ui->labelImmature->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, currentImmatureBalance, false, BitcoinUnits::separatorAlways));
+    ui->labelAnonymized->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, currentAnonymizedBalance, false, BitcoinUnits::separatorAlways));
+    ui->labelTotal->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, balances.balance + currentUnconfirmedBalance + currentImmatureBalance, false, BitcoinUnits::separatorAlways));
+    ui->labelWatchPending->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, currentWatchUnconfBalance, false, BitcoinUnits::separatorAlways));
+    ui->labelWatchImmature->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, currentWatchImmatureBalance, false, BitcoinUnits::separatorAlways));
+    ui->labelWatchTotal->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, currentWatchOnlyBalance + currentWatchUnconfBalance + currentWatchImmatureBalance, false, BitcoinUnits::separatorAlways));    
     // only show immature (newly mined) balance if it's non-zero, so as not to complicate things
     // for the non-mining users
     bool showImmature = balances.immature_balance != 0;

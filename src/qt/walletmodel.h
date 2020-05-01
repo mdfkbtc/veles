@@ -172,7 +172,20 @@ public:
     AddressTableModel *getAddressTableModel();
     TransactionTableModel *getTransactionTableModel();
     RecentRequestsTableModel *getRecentRequestsTableModel();
-
+    // VELES BEGIN
+    CAmount getBalance(const CCoinControl *coinControl = nullptr) const;
+    CAmount getUnconfirmedBalance() const;
+    CAmount getImmatureBalance() const;
+    CAmount getAnonymizableBalance(bool fSkipDenominated, bool fSkipUnconfirmed) const;
+    CAmount getAnonymizedBalance() const;
+    CAmount getDenominatedBalance(bool unconfirmed) const;
+    CAmount getNormalizedAnonymizedBalance() const;
+    CAmount getAverageAnonymizedRounds() const;
+    bool haveWatchOnly() const;
+    CAmount getWatchBalance() const;
+    CAmount getWatchUnconfirmedBalance() const;
+    CAmount getWatchImmatureBalance() const;
+    // VELES END
     EncryptionStatus getEncryptionStatus() const;
 
     // Check address for validity
