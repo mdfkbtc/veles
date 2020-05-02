@@ -226,20 +226,29 @@ void OverviewPage::setBalance(const interfaces::WalletBalances& balances)
         ui->labelWatchTotal->setText(BitcoinUnits::formatWithUnit(unit, balances.watch_only_balance + balances.unconfirmed_watch_only_balance + balances.immature_watch_only_balance, false, BitcoinUnits::separatorAlways));
     }
 */
-    //currentBalance = balances.balance;
-    currentUnconfirmedBalance = balances.unconfirmed_balance;
-    currentImmatureBalance = balances.immature_balance;
-    currentAnonymizedBalance = balances.anonymized_balance;
-    currentWatchOnlyBalance = balances.watch_only_balance;
-    currentWatchImmatureBalance = balances.immature_balance;
-    ui->labelBalance->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, balances.balance, false, BitcoinUnits::separatorAlways));
-    ui->labelUnconfirmed->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, currentUnconfirmedBalance, false, BitcoinUnits::separatorAlways));
-    ui->labelImmature->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, currentImmatureBalance, false, BitcoinUnits::separatorAlways));
-    ui->labelAnonymized->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, currentAnonymizedBalance, false, BitcoinUnits::separatorAlways));
-    ui->labelTotal->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, balances.balance + currentUnconfirmedBalance + currentImmatureBalance, false, BitcoinUnits::separatorAlways));
-    ui->labelWatchPending->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, currentWatchUnconfBalance, false, BitcoinUnits::separatorAlways));
-    ui->labelWatchImmature->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, currentWatchImmatureBalance, false, BitcoinUnits::separatorAlways));
-    ui->labelWatchTotal->setText(BitcoinUnits::formatWithUnit(nDisplayUnit, currentWatchOnlyBalance + currentWatchUnconfBalance + currentWatchImmatureBalance, false, BitcoinUnits::separatorAlways));    
+    int unit = walletModel->getOptionsModel()->getDisplayUnit();
+    m_balances = balances;
+    if (walletModel->privateKeysDisabled()) {
+        ui->labelBalance->setText(BitcoinUnits::formatWithUnit(unit, balances.watch_only_balance, false, BitcoinUnits::separatorAlways));
+        ui->labelUnconfirmed->setText(BitcoinUnits::formatWithUnit(unit, balances.unconfirmed_watch_only_balance, false, BitcoinUnits::separatorAlways));
+        ui->labelImmature->setText(BitcoinUnits::formatWithUnit(unit, balances.immature_watch_only_balance, false, BitcoinUnits::separatorAlways));
+        ui->labelTotal->setText(BitcoinUnits::formatWithUnit(unit, balances.watch_only_balance + balances.unconfirmed_watch_only_balance + balances.immature_watch_only_balance, false, BitcoinUnits::separatorAlways));
+    } else {
+        //currentBalance = balances.balance;
+        currentUnconfirmedBalance = balances.unconfirmed_balance;
+        currentImmatureBalance = balances.immature_balance;
+        currentAnonymizedBalance = balances.anonymized_balance;
+        currentWatchOnlyBalance = balances.watch_only_balance;
+        currentWatchImmatureBalance = balances.immature_balance;
+        ui->labelBalance->setText(BitcoinUnits::formatWithUnit(unit, balances.balance, false, BitcoinUnits::separatorAlways));
+        ui->labelUnconfirmed->setText(BitcoinUnits::formatWithUnit(unit, currentUnconfirmedBalance, false, BitcoinUnits::separatorAlways));
+        ui->labelImmature->setText(BitcoinUnits::formatWithUnit(unit, currentImmatureBalance, false, BitcoinUnits::separatorAlways));
+        ui->labelAnonymized->setText(BitcoinUnits::formatWithUnit(unit, currentAnonymizedBalance, false, BitcoinUnits::separatorAlways));
+        ui->labelTotal->setText(BitcoinUnits::formatWithUnit(unit, balances.balance + currentUnconfirmedBalance + currentImmatureBalance, false, BitcoinUnits::separatorAlways));
+        ui->labelWatchPending->setText(BitcoinUnits::formatWithUnit(unit, currentWatchUnconfBalance, false, BitcoinUnits::separatorAlways));
+        ui->labelWatchImmature->setText(BitcoinUnits::formatWithUnit(unit, currentWatchImmatureBalance, false, BitcoinUnits::separatorAlways));
+        ui->labelWatchTotal->setText(BitcoinUnits::formatWithUnit(unit, currentWatchOnlyBalance + currentWatchUnconfBalance + currentWatchImmatureBalance, false, BitcoinUnits::separatorAlways));    
+    }
     // only show immature (newly mined) balance if it's non-zero, so as not to complicate things
     // for the non-mining users
     bool showImmature = balances.immature_balance != 0;
@@ -364,6 +373,7 @@ void OverviewPage::showOutOfSyncWarning(bool fShow)
 {
     ui->labelWalletStatus->setVisible(fShow);
     ui->labelTransactionsStatus->setVisible(fShow);
+    ui->labelPrivateSendSyncStatus->setVisible(fShow);
 }
 
 void OverviewPage::updatePrivateSendProgress()
@@ -486,6 +496,9 @@ void OverviewPage::updateAdvancedPSUI(bool fShowAdvancedPSUI) {
     ui->labelSubmittedDenomText->setVisible(fShowAdvancedPSUI);
     ui->labelSubmittedDenom->setVisible(fShowAdvancedPSUI);
     ui->labelPrivateSendLastMessage->setVisible(fShowAdvancedPSUI);
+    ui->privateSendAuto->setVisible(fShowAdvancedPSUI);
+    ui->privateSendReset->setVisible(fShowAdvancedPSUI);
+    ui->privateSendInfo->setVisible(true);
 }
 
 void OverviewPage::privateSendStatus()
@@ -606,7 +619,7 @@ void OverviewPage::privateSendStatus()
 
     ui->labelPrivateSendLastMessage->setText(s);
 
-    ui->labelSubmittedDenom->setText(QString(privateSendClient.nSessionDenom));
+    //ui->labelSubmittedDenom->setText(QString(privateSendClient.nSessionDenom));
 }
 
 void OverviewPage::privateSendAuto(){
