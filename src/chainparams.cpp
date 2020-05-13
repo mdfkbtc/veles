@@ -210,7 +210,7 @@ public:
                 { 50000, uint256S("0xf335e1deda524c14026d473467753b365f572eecd0221ad72b6a29b53ebe163a")},
                 {100000, uint256S("0x000000000000005f9df7c4a29b7fc8ba96ca5f49a1122b7dce6fc0f311085bec")},
                 {167000, uint256S("0x22f677b269906cf135975d5f3b995f50614064d7f10782c590eb35193c80753c")},
-		{196000, uint256S("0x8ee72b4d92ea131e973f1f0cc5ce5e0170683a41a2a10e7c7d2003122d06ad66")}    
+		        {196000, uint256S("0x8ee72b4d92ea131e973f1f0cc5ce5e0170683a41a2a10e7c7d2003122d06ad66")}    
 
             }
         };
@@ -259,6 +259,8 @@ public:
          consensus.nDevFundPaymentsStartPercent =  5;
          consensus.nDevFundPaymentsFinalPercent =  0; // no more dev rewards after 5 years
          consensus.nDevFundPaymentsLegacyPercent = 5;
+         consensus.nVlsRewardsAlphaMultiplier = 10;          // correction factor for block rewards since VCIP01
+
          // VELES END
         consensus.nInstantSendKeepLock = 6;
 
@@ -267,7 +269,7 @@ public:
         consensus.nBudgetPaymentsWindowBlocks = 10;
         consensus.nBudgetProposalEstablishingTime = 60*20;
 
-        consensus.nSuperblockStartBlock = 4200;
+        consensus.nSuperblockStartBlock = 4000;
         consensus.nSuperblockCycle = 24;
 
         consensus.nGovernanceMinQuorum = 1;
@@ -277,12 +279,12 @@ public:
         // FXTC TODO: BIP16Exception is valid for BTC blockchain only
         consensus.BIP16Exception = uint256S("");
         consensus.BIP34Height = -1; // genesis
-        consensus.BIP34Hash = uint256S("0x000000cf9c24c95589943d0d0555260eb59a4f41ca74638d29db9f4f2ff981df"); // genesis hash
+        consensus.BIP34Hash = uint256S("0x868059d3573325a120f9801fd50ee45e4a0eac45800e00bfb629daaffe772914"); // genesis hash
         consensus.BIP65Height = -1; // genesis
         consensus.BIP66Height = -1; // genesis
         consensus.powLimit = uint256S("0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 3.5 * 24 * 60 * 60; // 3.5 days
-        consensus.nPowTargetSpacing = 2.5 * 60; // 2.5 minutes
+        consensus.nPowTargetSpacing = 2 * 60; // 2.5 minutes
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 1512; // 75% for testchains
@@ -303,29 +305,25 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = Consensus::BIP9Deployment::ALWAYS_ACTIVE;
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = Consensus::BIP9Deployment::NO_TIMEOUT;
 
-        // VLS BEGIN
-        consensus.nVlsRewardsAlphaMultiplier = 10;
-        // VLS END
-
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
 
         // By default assume that the signatures in ancestors of this block are valid.
         consensus.defaultAssumeValid = uint256S("0x00");
 
-        pchMessageStart[0] = 0xbc;
-        pchMessageStart[1] = 0xa3;
-        pchMessageStart[2] = 0x4f;
+        pchMessageStart[0] = 0xb3;
+        pchMessageStart[1] = 0xa6;
+        pchMessageStart[2] = 0x4c;
         pchMessageStart[3] = 0xc5;
         nDefaultPort = 21335;
         nPruneAfterHeight = 1000;
         m_assumed_blockchain_size = 1;
         m_assumed_chain_state_size = 0;
 
-        genesis = CreateGenesisBlock(1541515957, 271643, 0x1e0ffff0, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1588594957, 2143005, 0x1e0ffff0, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        //assert(consensus.hashGenesisBlock == uint256S("000000cf9c24c95589943d0d0555260eb59a4f41ca74638d29db9f4f2ff981df"));
-        //assert(genesis.hashMerkleRoot == uint256S("0xe36b6a8bf04edc01c2b3d5c43349eda9d704b0f930bd6176b920e605442b4f52"));
+        assert(consensus.hashGenesisBlock == uint256S("0x868059d3573325a120f9801fd50ee45e4a0eac45800e00bfb629daaffe772914"));
+        assert(genesis.hashMerkleRoot == uint256S("0xbdcdbf2e9eaf16abf1422df3406902eb22d0314ab7eda1cd44d1da75b73a4bc3"));
 
         vFixedSeeds.clear();
         vSeeds.clear();
@@ -334,14 +332,14 @@ public:
         //vSeeds.emplace_back("testnet-veles.midnightminer.net");
 
         // FXTC prefix 't'
-        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,111);
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,82);
         // FXTC prefix 'T'
-        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);
+        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,72);
         // FXTC prefix 'Y'
-        base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,239);
+        base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,212);
         // BIP32 prefixes
-        base58Prefixes[EXT_PUBLIC_KEY] = {0x04, 0x35, 0x87, 0xCF};
-        base58Prefixes[EXT_SECRET_KEY] = {0x04, 0x35, 0x83, 0x94};
+        base58Prefixes[EXT_PUBLIC_KEY] = {0x44, 0x35, 0x87, 0xCF};
+        base58Prefixes[EXT_SECRET_KEY] = {0x34, 0x35, 0x83, 0x94};
 
         bech32_hrp = "testnet1veles";
 
@@ -354,13 +352,13 @@ public:
         // Dash
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
-        strSporkPubKey = "045ba3e4d94368136f2cb66b873221a172f0e95d5e67e9da828e90f40dc4e4b962c19f621c6491749f3c235ab0e6c0cfbc4511a6e5569c9b18857345da589eb2e6";
+        strSporkPubKey = "04dd81722ca86972078526d607077128e1eeda2af95f00363964fdde11bc343e00b3018336b92e022d9d6589b8295eaf44fac2bb850d9dfb0e87c681db1d1befae";
 
-        founderAddress = "";
+        founderAddress = "a8LCYvxv7fTgMsRiUNSLKPRG6iKGrRQHoF";
 
         checkpointData = {
             {
-                {0, uint256S("0x3141b4039623ff0f86391d69394bc03c43a23a277b194980b21810e924349ccf")},
+                {0, uint256S("0x868059d3573325a120f9801fd50ee45e4a0eac45800e00bfb629daaffe772914")},
             }
         };
         // FXTC BEGIN
@@ -369,7 +367,7 @@ public:
 
         chainTxData = ChainTxData{
             // Data as of block 00000706ff7091032d187cf1c2515a5d7891b6797f414526ef8a277491117d08 (height 0)
-            1541515957,
+            1588594957,
             2,
             960
         };
