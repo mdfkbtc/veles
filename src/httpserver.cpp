@@ -23,6 +23,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <signal.h>
+#include <deque>
 
 #include <event2/thread.h>
 #include <event2/buffer.h>
