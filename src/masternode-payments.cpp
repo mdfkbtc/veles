@@ -283,13 +283,16 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
         // no masternode detected...
         int nCount = 0;
         masternode_info_t mnInfo;
-        std::string chain = gArgs.GetChainName();
-        if (chain != CBaseChainParams::TESTNET || !mnodeman.GetNextMasternodeInQueueForPayment(nBlockHeight, true, nCount, mnInfo)) {
+        if (!mnodeman.GetNextMasternodeInQueueForPayment(nBlockHeight, true, nCount, mnInfo)) {
+            std::string chain = gArgs.GetChainName();
             // ...and we can't calculate it on our own
-            LogPrintf("CMasternodePayments::FillBlockPayee -- Failed to detect masternode to pay\n");
-            return;
-        } else {
-            true;
+            if (chain == CBaseChainParams::MAIN) {
+                LogPrintf("CMasternodePayments::FillBlockPayee -- Failed to detect masternode to pay\n");
+                return;
+            } else {
+                true;
+            }
+
         }
         // fill payee with locally calculated winner and hope for the best
         payee = GetScriptForDestination(mnInfo.pubKeyCollateralAddress.GetID());

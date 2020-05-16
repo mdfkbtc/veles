@@ -247,9 +247,9 @@ public:
 
         // Dash
         consensus.nMasternodeMinimumConfirmations = 15;
-        consensus.nMasternodePaymentsStartBlock = 10; // not true, but it's ok as long as it's less then nMasternodePaymentsIncreaseBlock
+        consensus.nMasternodePaymentsStartBlock = 1000; // not true, but it's ok as long as it's less then nMasternodePaymentsIncreaseBlock
         //consensus.nMasternodePaymentsIncreaseBlock = 10;
-        consensus.nMasternodePaymentsIncreasePeriod = 25;
+        consensus.nMasternodePaymentsIncreasePeriod = 10;
         consensus.nMasternodeCollateral = 500; // MN collateral
         // VELES BEGIN
          consensus.nMasternodePaymentsStartPercent =  5;
