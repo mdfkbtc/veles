@@ -78,6 +78,15 @@ bool CMasternodeConfig::read(std::string& strErr) {
                 streamConfig.close();
                 return false;
             }
+        } else if (Params().NetworkIDString() == CBaseChainParams::TESTNET) {
+            if(port != nDefaultPort) {
+               strErr = _("Invalid port detected in masternode.conf") + "\n" +
+                        strprintf(_("Port: %d"), port) + "\n" +
+                        strprintf(_("Line: %d"), linenumber) + "\n\"" + line + "\"" + "\n" +
+                        strprintf(_("(must be %d for mainnet)"), nDefaultPort);
+                streamConfig.close();
+                return false;
+            }
         } else if(port == nDefaultPort) {
             strErr = _("Invalid port detected in masternode.conf") + "\n" +
                     strprintf(_("Line: %d"), linenumber) + "\n\"" + line + "\"" + "\n" +

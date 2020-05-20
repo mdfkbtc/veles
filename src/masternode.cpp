@@ -406,6 +406,9 @@ bool CMasternodeBroadcast::Create(std::string strService, std::string strKeyMast
     if (Params().NetworkIDString() == CBaseChainParams::MAIN) {
         if (service.GetPort() != nDefaultPort)
             return Log(strprintf("Invalid port %u for masternode %s, only %d is supported on mainnet.\n", service.GetPort(), strService, nDefaultPort));
+    } else if (Params().NetworkIDString() == CBaseChainParams::TESTNET) {
+        if (service.GetPort() != nDefaultPort)
+            return Log(strprintf("Invalid port %u for masternode %s, only %d is supported on testnet.\n", service.GetPort(), strService, nDefaultPort));
     } else if (service.GetPort() == nDefaultPort)
         return Log(strprintf("Invalid port %u for masternode %s, %d is the only supported on mainnet.\n", service.GetPort(), strService, nDefaultPort));
 
@@ -501,6 +504,8 @@ bool CMasternodeBroadcast::SimpleCheck(int& nDos)
 
     int nDefaultPort = Params().GetDefaultPort();
     if(Params().NetworkIDString() == CBaseChainParams::MAIN) {
+        if(addr.GetPort() != nDefaultPort) return false;
+    } else if(Params().NetworkIDString() == CBaseChainParams::TESTNET) {
         if(addr.GetPort() != nDefaultPort) return false;
     } else if(addr.GetPort() == nDefaultPort) return false;
 
