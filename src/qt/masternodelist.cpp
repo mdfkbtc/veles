@@ -29,7 +29,6 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QDesktopServices>
-#include <QUrl>
 
 int GetOffsetFromUtc()
 {
